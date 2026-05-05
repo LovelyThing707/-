@@ -1,0 +1,3155 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>ナビナビ 基本設計書（Phase 1 納品物）</title>
+<style>
+  @page {
+    size: A4;
+    margin: 18mm 16mm 20mm 16mm;
+    @bottom-center {
+      content: counter(page) " / " counter(pages);
+      font-family: 'Noto Sans CJK JP', sans-serif;
+      font-size: 9pt;
+      color: #8a8a8a;
+    }
+    @bottom-right {
+      content: "ナビナビ 基本設計書 v1.0";
+      font-family: 'Noto Sans CJK JP', sans-serif;
+      font-size: 9pt;
+      color: #8a8a8a;
+    }
+  }
+  @page :first { margin: 0; @bottom-center { content: none; } @bottom-right { content: none; } }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    font-family: 'Noto Sans CJK JP', 'Noto Sans JP', sans-serif;
+    font-size: 10pt;
+    line-height: 1.85;
+    color: #1a1a1a;
+  }
+
+  /* ========== COVER ========== */
+  .cover {
+    page-break-after: always;
+    height: 297mm;
+    background: #FAFAF7;
+    color: #1a1a1a;
+    padding: 38mm 22mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+  }
+  .cover::before {
+    content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4mm;
+    background: linear-gradient(90deg, #c8553d 0%, #d4a84b 100%);
+  }
+  .cover-tag {
+    font-size: 10pt;
+    letter-spacing: 0.3em;
+    color: #c8553d;
+    font-weight: 700;
+    margin-bottom: 6mm;
+  }
+  .cover-deliverable {
+    display: inline-block;
+    background: #1a1a1a;
+    color: #FAFAF7;
+    padding: 3mm 8mm;
+    font-size: 11pt;
+    letter-spacing: 0.2em;
+    font-weight: 700;
+    margin-bottom: 25mm;
+  }
+  .cover-title {
+    font-family: 'Noto Serif CJK JP', serif;
+    font-size: 38pt;
+    font-weight: 900;
+    line-height: 1.2;
+    margin-bottom: 6mm;
+  }
+  .cover-subtitle {
+    font-family: 'Noto Serif CJK JP', serif;
+    font-size: 14pt;
+    color: #4a4a4a;
+    margin-bottom: 8mm;
+  }
+  .cover-tagline {
+    font-size: 10.5pt;
+    line-height: 2;
+    color: #4a4a4a;
+    max-width: 130mm;
+    border-left: 3px solid #c8553d;
+    padding-left: 6mm;
+  }
+  .cover-meta {
+    border-top: 2px solid #1a1a1a;
+    padding-top: 8mm;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6mm;
+  }
+  .cover-meta-item h4 {
+    font-size: 9pt;
+    letter-spacing: 0.2em;
+    color: #8a8a8a;
+    margin-bottom: 2mm;
+    font-weight: 700;
+  }
+  .cover-meta-item p { font-size: 11pt; }
+  .cover-meta-item p strong {
+    display: block;
+    font-family: 'Noto Serif CJK JP', serif;
+    font-size: 14pt;
+    margin-bottom: 1mm;
+  }
+
+  /* ========== TOC ========== */
+  .toc-page { page-break-after: always; padding-top: 6mm; }
+  .toc-tag { font-size: 9pt; letter-spacing: 0.25em; color: #c8553d; font-weight: 700; margin-bottom: 3mm; }
+  .toc-title {
+    font-family: 'Noto Serif CJK JP', serif;
+    font-size: 24pt;
+    font-weight: 700;
+    margin-bottom: 2mm;
+    border-bottom: 2px solid #1a1a1a;
+    padding-bottom: 4mm;
+  }
+  .toc-list { list-style: none; margin-top: 8mm; }
+  .toc-list li {
+    padding: 2.5mm 0;
+    border-bottom: 1px dashed #d8d6d0;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 10.5pt;
+  }
+  .toc-list li.toc-section {
+    margin-top: 4mm;
+    padding-bottom: 2mm;
+    border-bottom: 1px solid #1a1a1a;
+    font-weight: 700;
+    font-size: 11pt;
+  }
+  .toc-num { color: #c8553d; font-weight: 700; margin-right: 4mm; min-width: 14mm; }
+  .toc-text { flex: 1; }
+  .toc-page-num { color: #8a8a8a; font-size: 9pt; margin-left: 4mm; }
+
+  /* ========== INTRO PAGE ========== */
+  .intro-page { page-break-after: always; }
+
+  /* ========== SECTIONS ========== */
+  .section { page-break-before: always; }
+  .section:first-of-type { page-break-before: auto; }
+
+  h1.page-title {
+    font-family: 'Noto Serif CJK JP', serif;
+    font-size: 22pt;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 2mm;
+    padding-bottom: 4mm;
+    border-bottom: 2px solid #1a1a1a;
+  }
+  h1.page-title::before {
+    content: attr(data-num);
+    display: block;
+    font-size: 9pt;
+    letter-spacing: 0.25em;
+    color: #c8553d;
+    font-weight: 700;
+    margin-bottom: 2mm;
+  }
+  h1.page-title span.en {
+    display: block;
+    font-size: 9pt;
+    letter-spacing: 0.2em;
+    color: #8a8a8a;
+    font-weight: 500;
+    margin-top: 2mm;
+  }
+
+  h2 {
+    font-family: 'Noto Serif CJK JP', serif;
+    font-size: 14pt;
+    font-weight: 700;
+    margin: 8mm 0 4mm;
+    padding-left: 4mm;
+    border-left: 4px solid #c8553d;
+    line-height: 1.4;
+  }
+
+  h3 {
+    font-size: 11.5pt;
+    font-weight: 700;
+    margin: 6mm 0 2mm;
+  }
+  h3.numbered::before {
+    content: attr(data-num);
+    display: inline-block;
+    width: 7mm;
+    height: 7mm;
+    background: #c8553d;
+    color: #fff;
+    text-align: center;
+    line-height: 7mm;
+    border-radius: 50%;
+    font-size: 9pt;
+    margin-right: 3mm;
+    vertical-align: middle;
+  }
+
+  h4 { font-size: 10.5pt; font-weight: 700; margin: 4mm 0 2mm; color: #4a4a4a; }
+
+  p { margin-bottom: 3mm; text-align: justify; }
+  strong { font-weight: 700; }
+
+  ul, ol { margin: 2mm 0 4mm 6mm; padding: 0; }
+  li { margin-bottom: 1.5mm; line-height: 1.85; }
+
+  /* ========== BOXES ========== */
+  .box {
+    border: 1px solid #e8e6e0;
+    background: #fafaf7;
+    padding: 5mm 6mm;
+    margin: 4mm 0;
+    border-radius: 2mm;
+    page-break-inside: avoid;
+  }
+  .box.tip { border-left: 4px solid #3f7d5c; background: #e9f3ed; }
+  .box.warn { border-left: 4px solid #d4a84b; background: #faf1dc; }
+  .box.danger { border-left: 4px solid #c8553d; background: #fae8e3; }
+  .box.info { border-left: 4px solid #4a7d9d; background: #e4eef5; }
+  .box h4 { margin-top: 0; font-size: 10.5pt; margin-bottom: 2mm; }
+  .box.tip h4 { color: #3f7d5c; }
+  .box.warn h4 { color: #b8902f; }
+  .box.danger h4 { color: #c8553d; }
+  .box.info h4 { color: #4a7d9d; }
+  .box p { font-size: 9.5pt; margin-bottom: 2mm; }
+  .box p:last-child { margin-bottom: 0; }
+
+  /* ========== TABLES ========== */
+  table { width: 100%; border-collapse: collapse; margin: 4mm 0 6mm; font-size: 9.5pt; }
+  th, td { padding: 3mm 4mm; text-align: left; vertical-align: top; border-bottom: 1px solid #e8e6e0; }
+  th { background: #1a1a1a; color: #fafaf7; font-weight: 700; font-size: 9pt; }
+  tbody tr:nth-child(even) { background: #fafaf7; }
+  td.center { text-align: center; }
+
+  /* ========== TWO COLUMN ========== */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; margin: 4mm 0; page-break-inside: avoid; }
+  .col-card { border: 1px solid #e8e6e0; padding: 4mm 5mm; background: #fafaf7; border-radius: 2mm; }
+  .col-card h4 { margin-top: 0; font-size: 10.5pt; padding-bottom: 2mm; border-bottom: 1px solid #e8e6e0; margin-bottom: 3mm; }
+  .col-card ul { margin: 0 0 0 4mm; }
+  .col-card li { font-size: 9pt; line-height: 1.6; margin-bottom: 1mm; }
+
+  /* ========== PART HEADER ========== */
+  .part-header {
+    page-break-before: always;
+    height: 297mm;
+    background: linear-gradient(160deg, #1a1a1a 0%, #2a2a2a 100%);
+    color: #fafaf7;
+    padding: 60mm 22mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+  }
+  .part-header::before {
+    content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2mm;
+    background: linear-gradient(90deg, #c8553d 0%, #d4a84b 100%);
+  }
+  .part-header .part-num {
+    font-size: 11pt;
+    letter-spacing: 0.4em;
+    color: #d4a84b;
+    font-weight: 700;
+    margin-bottom: 4mm;
+  }
+  .part-header h1 {
+    font-family: 'Noto Serif CJK JP', serif;
+    font-size: 36pt;
+    font-weight: 900;
+    line-height: 1.2;
+    margin-bottom: 8mm;
+    border: none;
+    padding: 0;
+  }
+  .part-header .part-desc {
+    font-size: 11pt;
+    line-height: 2;
+    color: #c0c0c0;
+    max-width: 130mm;
+    border-left: 3px solid #d4a84b;
+    padding-left: 6mm;
+  }
+  .part-header .part-contents {
+    margin-top: 12mm;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4mm;
+    max-width: 130mm;
+  }
+  .part-header .part-content-item {
+    border: 1px solid #555;
+    padding: 3mm 4mm;
+    font-size: 10pt;
+  }
+  .part-header .part-content-item strong { color: #d4a84b; display: block; font-size: 9pt; letter-spacing: 0.1em; margin-bottom: 1mm; }
+
+  /* ========== DIAGRAM CONTAINER ========== */
+  .diagram-container {
+    background: #fafaf7;
+    border: 1px solid #e8e6e0;
+    padding: 6mm;
+    margin: 4mm 0;
+    border-radius: 2mm;
+    page-break-inside: avoid;
+    text-align: center;
+  }
+  .diagram-container svg { max-width: 100%; height: auto; }
+  .diagram-caption {
+    font-size: 9pt;
+    color: #8a8a8a;
+    margin-top: 3mm;
+    font-style: italic;
+  }
+
+  /* ========== STEP DIAGRAM ========== */
+  .step-flow {
+    display: flex;
+    margin: 4mm 0;
+    page-break-inside: avoid;
+    gap: 0;
+  }
+  .step-item {
+    flex: 1;
+    background: #fff;
+    border: 1px solid #1a1a1a;
+    padding: 3mm 2mm;
+    text-align: center;
+    position: relative;
+    font-size: 8.5pt;
+  }
+  .step-item.active { background: #1a1a1a; color: #fff; }
+  .step-item .step-num {
+    display: block;
+    font-size: 7pt;
+    letter-spacing: 0.1em;
+    color: #c8553d;
+    font-weight: 700;
+    margin-bottom: 1mm;
+  }
+  .step-item.active .step-num { color: #d4a84b; }
+  .step-item .step-name { font-size: 9pt; font-weight: 700; }
+
+  /* ========== CHECKLIST ========== */
+  .checklist { list-style: none; margin-left: 0; }
+  .checklist li { padding-left: 8mm; position: relative; margin-bottom: 1.5mm; }
+  .checklist li::before {
+    content: '☐'; position: absolute; left: 0; top: 0;
+    color: #c8553d; font-weight: 700; font-size: 12pt;
+  }
+
+  /* ========== APPROVAL PAGE ========== */
+  .approval-page {
+    page-break-before: always;
+    padding: 40mm 22mm 30mm;
+  }
+  .approval-title {
+    font-family: 'Noto Serif CJK JP', serif;
+    font-size: 30pt;
+    font-weight: 700;
+    margin-bottom: 4mm;
+    border-bottom: 2px solid #1a1a1a;
+    padding-bottom: 6mm;
+  }
+  .approval-block {
+    margin-top: 30mm;
+    padding: 8mm 10mm;
+    border: 2px solid #1a1a1a;
+    page-break-inside: avoid;
+  }
+  .approval-block h3 {
+    font-family: 'Noto Serif CJK JP', serif;
+    font-size: 14pt;
+    margin-bottom: 6mm;
+    border-bottom: 1px solid #e8e6e0;
+    padding-bottom: 3mm;
+  }
+  .signature-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8mm;
+    margin-top: 12mm;
+  }
+  .signature-cell { border-bottom: 1px solid #1a1a1a; padding-bottom: 2mm; min-height: 25mm; position: relative; }
+  .signature-cell::after {
+    content: attr(data-label);
+    position: absolute;
+    top: 0; left: 0;
+    font-size: 9pt;
+    color: #8a8a8a;
+  }
+
+  /* ========== STATUS BADGE ========== */
+  .status-badge {
+    display: inline-block;
+    font-size: 8.5pt;
+    padding: 1mm 3mm;
+    border-radius: 2mm;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+  .status-pending { background: #faf1dc; color: #b8902f; border: 1px solid #d4a84b; }
+  .status-published { background: #e9f3ed; color: #3f7d5c; border: 1px solid #3f7d5c; }
+  .status-rejected { background: #fae8e3; color: #c8553d; border: 1px solid #c8553d; }
+  .status-private { background: #f0f0f0; color: #555; border: 1px solid #888; }
+
+  /* ========== PR TYPE BADGE ========== */
+  .pr-badge {
+    display: inline-block;
+    font-size: 8.5pt;
+    padding: 1mm 3mm;
+    border-radius: 2mm;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+  .pr-self { background: #fff; color: #3f7d5c; border: 2px solid #3f7d5c; }
+  .pr-gift { background: #fff; color: #7a6ba8; border: 2px solid #7a6ba8; }
+  .pr-pr { background: #c8553d; color: #fff; border: 2px solid #c8553d; }
+
+  .small { font-size: 9pt; color: #8a8a8a; }
+  .accent { color: #c8553d; }
+  .nob { page-break-inside: avoid; }
+
+  /* ============================================================
+     SCREEN MODE — ブラウザで開いたときの表示最適化
+     印刷時は @media print で打ち消され、元のA4印刷用レイアウトに戻る
+     ============================================================ */
+  @media screen {
+    html { scroll-behavior: smooth; }
+    body {
+      background: #efece6;
+      padding: 32px 16px 80px;
+      font-size: 14px;
+      line-height: 1.85;
+    }
+    /* 文書全体を1枚のカードのように見せる */
+    .doc-wrap {
+      max-width: 880px;
+      margin: 0 auto;
+      background: #fff;
+      box-shadow: 0 8px 40px rgba(26,26,26,0.08), 0 2px 8px rgba(26,26,26,0.04);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    /* カバー：画面用に高さ調整 */
+    .cover {
+      height: auto !important;
+      min-height: 720px;
+      padding: 80px 60px 60px !important;
+    }
+    .cover-title { font-size: 64px !important; }
+    .cover-subtitle { font-size: 22px !important; }
+    .cover-tagline { font-size: 15px !important; max-width: 100% !important; }
+    .cover-meta-item p { font-size: 16px !important; }
+    .cover-meta-item p strong { font-size: 20px !important; }
+
+    /* TOC・section共通 */
+    .toc-page, .section {
+      padding: 60px 60px 50px !important;
+      page-break-before: auto !important;
+      page-break-after: auto !important;
+    }
+    .section + .section, .toc-page + .section, .section + .toc-page {
+      border-top: 1px solid #e8e6e0;
+    }
+
+    /* タイポグラフィを画面用に調整 */
+    h1.page-title { font-size: 32px !important; padding-bottom: 18px !important; margin-bottom: 8px !important; }
+    h1.page-title::before { font-size: 12px !important; }
+    h1.page-title span.en { font-size: 12px !important; }
+    h2 { font-size: 20px !important; margin: 28px 0 14px !important; }
+    h3 { font-size: 16px !important; margin: 20px 0 8px !important; }
+    h4 { font-size: 14px !important; margin: 14px 0 6px !important; }
+    p { font-size: 14px !important; margin-bottom: 12px !important; }
+    li { font-size: 14px !important; }
+    code, pre { font-size: 12.5px !important; }
+    table, th, td { font-size: 13px !important; }
+    th, td { padding: 10px 14px !important; }
+
+    /* ボックス類のpadding/margin調整 */
+    .box { padding: 18px 22px !important; margin: 16px 0 !important; }
+    .box p { font-size: 13.5px !important; }
+    .toc-list li { padding: 10px 0 !important; font-size: 14px !important; }
+    .timeline-item { margin-bottom: 18px !important; }
+    .principle-card { padding: 14px 18px !important; margin: 10px 0 !important; }
+
+    /* PARTヘッダー */
+    .part-header {
+      height: auto !important;
+      min-height: auto !important;
+      padding: 50px 60px !important;
+      page-break-before: auto !important;
+    }
+    .part-header h1 { font-size: 36px !important; margin-bottom: 16px !important; }
+    .part-header .part-num { font-size: 13px !important; }
+    .part-header .part-desc { font-size: 14px !important; max-width: 100% !important; }
+    .part-header .part-contents { max-width: 100% !important; margin-top: 24px !important; }
+    .part-header .part-content-item { padding: 12px 16px !important; font-size: 13px !important; }
+
+    /* ページ番号（TOCのP.4等）は画面では非表示 */
+    .toc-page-num { opacity: 0.4; }
+
+    /* SVG最大幅指定 */
+    svg { max-width: 100%; height: auto; }
+
+    /* === フローティングナビ === */
+    .float-nav-btn {
+      position: fixed; right: 24px; bottom: 24px; z-index: 100;
+      background: #1a1a1a; color: #fff; border: none;
+      width: 56px; height: 56px; border-radius: 50%;
+      font-size: 22px; cursor: pointer;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+      transition: transform 0.2s, background 0.2s;
+      font-family: inherit;
+    }
+    .float-nav-btn:hover { background: #c8553d; transform: scale(1.08); }
+    .float-print-btn {
+      position: fixed; right: 24px; bottom: 92px; z-index: 100;
+      background: #fff; color: #1a1a1a; border: 1px solid #1a1a1a;
+      width: 56px; height: 56px; border-radius: 50%;
+      font-size: 18px; cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .float-print-btn:hover { background: #1a1a1a; color: #fff; transform: scale(1.08); }
+
+    /* ナビパネル */
+    .nav-panel {
+      position: fixed; right: -380px; top: 0; bottom: 0; width: 360px;
+      background: #fff; z-index: 101;
+      box-shadow: -8px 0 40px rgba(0,0,0,0.15);
+      transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow-y: auto;
+      padding: 32px 28px 80px;
+    }
+    .nav-panel.open { right: 0; }
+    .nav-panel-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+      z-index: 100; opacity: 0; pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .nav-panel-overlay.open { opacity: 1; pointer-events: auto; }
+    .nav-panel-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-bottom: 16px; border-bottom: 2px solid #1a1a1a; margin-bottom: 16px;
+    }
+    .nav-panel-title { font-family: 'Noto Serif CJK JP', serif; font-size: 18px; font-weight: 700; }
+    .nav-panel-close {
+      background: none; border: none; font-size: 24px; cursor: pointer;
+      width: 36px; height: 36px; border-radius: 50%; transition: background 0.2s;
+    }
+    .nav-panel-close:hover { background: #f3f2ee; }
+    .nav-panel ul { list-style: none; margin: 0; padding: 0; }
+    .nav-panel li { margin: 0; }
+    .nav-panel li.nav-section {
+      font-weight: 700; color: #c8553d; font-size: 11px;
+      letter-spacing: 0.15em; padding: 18px 0 6px;
+      border-bottom: 1px solid #e8e6e0; margin-bottom: 4px;
+    }
+    .nav-panel a {
+      display: flex; padding: 9px 8px; text-decoration: none;
+      color: #1a1a1a; font-size: 13.5px; line-height: 1.5;
+      border-radius: 4px; transition: background 0.15s;
+      gap: 10px; align-items: baseline;
+    }
+    .nav-panel a:hover { background: #fafaf7; color: #c8553d; }
+    .nav-panel a .nav-num {
+      flex-shrink: 0; min-width: 38px; color: #c8553d; font-weight: 700; font-size: 12px;
+    }
+
+    /* モバイル */
+    @media (max-width: 768px) {
+      body { padding: 0 0 80px; }
+      .doc-wrap { border-radius: 0; box-shadow: none; }
+      .cover { padding: 50px 28px 40px !important; min-height: auto; }
+      .cover-title { font-size: 42px !important; }
+      .cover-subtitle { font-size: 16px !important; }
+      .cover-meta { grid-template-columns: 1fr !important; }
+      .toc-page, .section, .part-header { padding: 36px 24px !important; }
+      h1.page-title { font-size: 24px !important; }
+      h2 { font-size: 17px !important; }
+      table { display: block; overflow-x: auto; }
+      .nav-panel { width: 92%; right: -100%; }
+      .nav-panel.open { right: 0; }
+      .two-col { grid-template-columns: 1fr !important; }
+    }
+
+    /* スクロール時にヘッダー隠れを回避 */
+    .section, .toc-page, .cover, .part-header, .approval-page { scroll-margin-top: 24px; }
+
+    /* ヘッダーバー（最上部） */
+    .doc-header {
+      background: #1a1a1a; color: #fff;
+      padding: 14px 24px;
+      display: flex; justify-content: space-between; align-items: center;
+      max-width: 880px; margin: 0 auto 24px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    .doc-header-title { font-weight: 700; letter-spacing: 0.05em; }
+    .doc-header-tag { color: #d4a84b; font-size: 11px; letter-spacing: 0.2em; }
+    @media (max-width: 768px) {
+      .doc-header { border-radius: 0; margin-bottom: 0; padding: 12px 18px; flex-wrap: wrap; gap: 4px; }
+      .doc-header-title { font-size: 12px; }
+    }
+  }
+
+  /* 印刷時はナビ・ヘッダー類を完全に非表示 */
+  @media print {
+    .float-nav-btn, .float-print-btn, .nav-panel, .nav-panel-overlay, .doc-header { display: none !important; }
+    .doc-wrap { box-shadow: none; max-width: none; background: none; }
+    body { background: none; padding: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- スクリーン表示時のみ表示されるヘッダーバー -->
+<div class="doc-header">
+  <span class="doc-header-title">ナビナビ 基本設計書 v1.0</span>
+  <span class="doc-header-tag">PHASE 1 DELIVERABLE</span>
+</div>
+
+<div class="doc-wrap">
+
+<!-- ============== COVER ============== -->
+<div class="cover" id="cover">
+  <div>
+    <div class="cover-tag">FOR  navinabi  様</div>
+    <div class="cover-deliverable">PHASE 1  DELIVERABLE</div>
+  </div>
+  <div>
+    <div class="cover-title">基本設計書</div>
+    <div class="cover-subtitle">日韓情報＆レビューサイト「ナビナビ」<br>WordPress開発プロジェクト</div>
+    <div class="cover-tagline">
+      本書は、ナビナビプロジェクトの基本設計を定義する文書です。サイト構造、データ設計、画面遷移、機能仕様の4つの観点から、本サービスを構成する全要素を網羅的に整理しています。本書への合意をもって、デザイン・開発フェーズに進みます。
+    </div>
+  </div>
+  <div class="cover-meta">
+    <div class="cover-meta-item">
+      <h4>文書バージョン</h4>
+      <p><strong>v1.0</strong>初版</p>
+    </div>
+    <div class="cover-meta-item">
+      <h4>発行日</h4>
+      <p><strong>2026年5月</strong>Phase 1 第1週</p>
+    </div>
+    <div class="cover-meta-item">
+      <h4>対象</h4>
+      <p><strong>navinabi 様</strong>クライアント承認用</p>
+    </div>
+    <div class="cover-meta-item">
+      <h4>提出者</h4>
+      <p><strong>AKAME</strong>プロジェクト担当</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============== TOC ============== -->
+<div class="toc-page" id="toc">
+  <div class="toc-tag">TABLE OF CONTENTS</div>
+  <div class="toc-title">目次</div>
+  <ul class="toc-list">
+    <li><span class="toc-num">—</span><span class="toc-text">本書について</span><span class="toc-page-num">P. 4</span></li>
+
+    <li class="toc-section">PART 1　サイト構造設計</li>
+    <li><span class="toc-num">1-1</span><span class="toc-text">サイトマップ全体図</span><span class="toc-page-num">P. 7</span></li>
+    <li><span class="toc-num">1-2</span><span class="toc-text">ページ一覧と役割定義</span><span class="toc-page-num">P. 9</span></li>
+    <li><span class="toc-num">1-3</span><span class="toc-text">URL設計</span><span class="toc-page-num">P. 12</span></li>
+
+    <li class="toc-section">PART 2　データ設計</li>
+    <li><span class="toc-num">2-1</span><span class="toc-text">エンティティ関係図（ER図）</span><span class="toc-page-num">P. 15</span></li>
+    <li><span class="toc-num">2-2</span><span class="toc-text">エンティティ詳細仕様</span><span class="toc-page-num">P. 17</span></li>
+    <li><span class="toc-num">2-3</span><span class="toc-text">レビューデータの構造</span><span class="toc-page-num">P. 21</span></li>
+    <li><span class="toc-num">2-4</span><span class="toc-text">ユーザープロフィール設計</span><span class="toc-page-num">P. 24</span></li>
+    <li><span class="toc-num">2-5</span><span class="toc-text">カテゴリ別評価項目</span><span class="toc-page-num">P. 26</span></li>
+    <li><span class="toc-num">2-6</span><span class="toc-text">ユーザー属性スナップショット方式</span><span class="toc-page-num">P. 28</span></li>
+
+    <li class="toc-section">PART 3　画面遷移設計</li>
+    <li><span class="toc-num">3-1</span><span class="toc-text">レビュー閲覧導線</span><span class="toc-page-num">P. 32</span></li>
+    <li><span class="toc-num">3-2</span><span class="toc-text">レビュー投稿導線</span><span class="toc-page-num">P. 34</span></li>
+    <li><span class="toc-num">3-3</span><span class="toc-text">管理者承認導線</span><span class="toc-page-num">P. 37</span></li>
+    <li><span class="toc-num">3-4</span><span class="toc-text">権限別アクセス制御</span><span class="toc-page-num">P. 39</span></li>
+
+    <li class="toc-section">PART 4　機能仕様</li>
+    <li><span class="toc-num">4-1</span><span class="toc-text">レビュー投稿フォーム仕様</span><span class="toc-page-num">P. 41</span></li>
+    <li><span class="toc-num">4-2</span><span class="toc-text">レビュー承認ワークフロー</span><span class="toc-page-num">P. 44</span></li>
+    <li><span class="toc-num">4-3</span><span class="toc-text">検索・フィルター・ランキング</span><span class="toc-page-num">P. 46</span></li>
+    <li><span class="toc-num">4-4</span><span class="toc-text">サジェスト機能と仮登録フロー</span><span class="toc-page-num">P. 49</span></li>
+    <li><span class="toc-num">4-5</span><span class="toc-text">レビュー自動翻訳ワークフロー</span><span class="toc-page-num">P. 51</span></li>
+    <li><span class="toc-num">4-6</span><span class="toc-text">多言語対応の方針</span><span class="toc-page-num">P. 53</span></li>
+    <li><span class="toc-num">4-7</span><span class="toc-text">ステマ対策の実装方針</span><span class="toc-page-num">P. 55</span></li>
+    <li><span class="toc-num">4-8</span><span class="toc-text">通知・メール送信仕様</span><span class="toc-page-num">P. 57</span></li>
+
+    <li><span class="toc-num">—</span><span class="toc-text">承認</span><span class="toc-page-num">P. 58</span></li>
+  </ul>
+</div>
+
+<!-- ============== INTRO ============== -->
+<section class="section" id="intro">
+  <h1 class="page-title" data-num="INTRODUCTION">本書について<span class="en">About This Document</span></h1>
+
+  <h2>本書の目的</h2>
+  <p>本書は、ナビナビプロジェクトの<strong>基本設計</strong>を定義する文書です。本サービスを構成するすべての要素（サイト構造、データ、画面遷移、機能）を、デザイン・開発に進む前に明文化し、navinabi様とAKAME（プロジェクト担当者）の双方で合意することを目的とします。</p>
+
+  <p>「実装してみたら想定と違っていた」という事態を防ぐため、画面の見た目を作る前に、本書で設計内容を完全に確定します。本書はプロジェクト全体の<strong>羅針盤</strong>として、デザイン・開発・テスト・運用の各フェーズで参照されます。</p>
+
+  <h2>本書の構成</h2>
+
+  <div class="two-col">
+    <div class="col-card">
+      <h4>PART 1　サイト構造設計</h4>
+      <ul>
+        <li>全ページの階層構造</li>
+        <li>各ページの役割定義</li>
+        <li>URL設計</li>
+      </ul>
+    </div>
+    <div class="col-card">
+      <h4>PART 2　データ設計</h4>
+      <ul>
+        <li>エンティティとリレーション</li>
+        <li>レビュー、商品、ブランド、店舗、ユーザーの構造</li>
+        <li>カテゴリ別評価項目</li>
+        <li>ユーザー属性スナップショット方式</li>
+      </ul>
+    </div>
+  </div>
+  <div class="two-col">
+    <div class="col-card">
+      <h4>PART 3　画面遷移設計</h4>
+      <ul>
+        <li>主要ユーザー導線</li>
+        <li>管理者導線</li>
+        <li>権限別アクセス制御</li>
+      </ul>
+    </div>
+    <div class="col-card">
+      <h4>PART 4　機能仕様</h4>
+      <ul>
+        <li>レビュー投稿、承認フロー</li>
+        <li>検索・フィルター・ランキング</li>
+        <li>サジェスト、自動翻訳</li>
+        <li>ステマ対策、通知</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>本書の読み方</h2>
+
+  <div class="box info">
+    <h4>クライアント様への読み方ガイド</h4>
+    <p><strong>① まずは目次と本ページを通読してください。</strong>本書全体の構成を把握できます。</p>
+    <p><strong>② PART 1（サイト構造）を最優先でご確認ください。</strong>サイト全体像を理解できます。</p>
+    <p><strong>③ PART 2（データ設計）は本書のコアです。</strong>「構造部分が特に重要」とのご要望に応える章です。技術的な内容を含みますが、各エンティティ（データのまとまり）の役割を理解いただくことが、後のフェーズでの誤解を防ぎます。</p>
+    <p><strong>④ PART 3（画面遷移）はユーザー目線の確認章です。</strong>ご自身がユーザーとして使う場面を想像しながら確認してください。</p>
+    <p><strong>⑤ PART 4（機能仕様）は実装の詳細を定義しています。</strong>細部に違和感があれば、この段階でご指摘ください。</p>
+  </div>
+
+  <h2>本書で確定すること、しないこと</h2>
+
+  <table>
+    <thead>
+      <tr><th>項目</th><th>本書で確定</th><th>後フェーズで決定</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>サイトの全ページ構成</td><td>○</td><td></td></tr>
+      <tr><td>データの種類とリレーション</td><td>○</td><td></td></tr>
+      <tr><td>ユーザー導線・画面遷移</td><td>○</td><td></td></tr>
+      <tr><td>各機能の仕様</td><td>○</td><td></td></tr>
+      <tr><td>具体的なデザイン（色・フォント・レイアウト）</td><td></td><td>Phase 2</td></tr>
+      <tr><td>WordPress技術詳細（プラグイン設定値等）</td><td></td><td>Phase 3</td></tr>
+      <tr><td>実装コード</td><td></td><td>Phase 3〜4</td></tr>
+    </tbody>
+  </table>
+
+  <h2>本書の取り扱い</h2>
+  <p>本書は<strong>v1.0（初版）</strong>として発行されます。navinabi様からのご指摘・ご要望を反映して、必要に応じてv1.1、v1.2と更新していきます。最終的に<strong>「本書の内容で実装を進める」</strong>という承認をいただいた版が確定版となり、この内容に基づいてPhase 2（デザイン）、Phase 3〜4（開発）が進行します。</p>
+
+  <p>本書承認後の仕様変更は、第14条（契約変更）に基づき別途協議となります。重要な確認段階ですので、十分にご検討ください。</p>
+</section>
+
+<!-- ============== PART 1 HEADER ============== -->
+<div class="part-header">
+  <div class="part-num">PART  1</div>
+  <h1>サイト構造設計</h1>
+  <div class="part-desc">
+    ナビナビを構成する全ページを階層構造で整理し、それぞれの役割を定義します。サイト全体の俯瞰図、ページ単位の機能、URL構造の3つの観点から、サイトの「骨格」を明確にします。
+  </div>
+  <div class="part-contents">
+    <div class="part-content-item"><strong>1-1</strong>サイトマップ全体図</div>
+    <div class="part-content-item"><strong>1-2</strong>ページ一覧と役割定義</div>
+    <div class="part-content-item"><strong>1-3</strong>URL設計</div>
+  </div>
+</div>
+
+<!-- ============== 1-1 SITE MAP ============== -->
+<section class="section" id="s1-1">
+  <h1 class="page-title" data-num="1-1">サイトマップ全体図<span class="en">Site Map Overview</span></h1>
+
+  <p>ナビナビは、<strong>3つのエリア</strong>から構成されます。誰でも閲覧可能な「公開エリア」、ログインユーザーのみアクセス可能な「会員エリア」、そして管理者のみがアクセスできる「管理者エリア」です。</p>
+
+  <h2>サイトマップ</h2>
+
+  <div class="diagram-container">
+    <svg viewBox="0 0 700 580" xmlns="http://www.w3.org/2000/svg" style="font-family: 'Noto Sans JP', sans-serif;">
+      <!-- Top Node -->
+      <rect x="280" y="10" width="140" height="40" rx="4" fill="#1a1a1a"/>
+      <text x="350" y="35" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">ナビナビ</text>
+
+      <!-- Lines from top -->
+      <line x1="350" y1="50" x2="120" y2="90" stroke="#1a1a1a" stroke-width="1.5"/>
+      <line x1="350" y1="50" x2="350" y2="90" stroke="#1a1a1a" stroke-width="1.5"/>
+      <line x1="350" y1="50" x2="580" y2="90" stroke="#1a1a1a" stroke-width="1.5"/>
+
+      <!-- 3 Areas -->
+      <rect x="40" y="90" width="160" height="34" rx="3" fill="#fafaf7" stroke="#3f7d5c" stroke-width="2"/>
+      <text x="120" y="112" text-anchor="middle" fill="#3f7d5c" font-size="11" font-weight="700">公開エリア</text>
+
+      <rect x="270" y="90" width="160" height="34" rx="3" fill="#fafaf7" stroke="#4a7d9d" stroke-width="2"/>
+      <text x="350" y="112" text-anchor="middle" fill="#4a7d9d" font-size="11" font-weight="700">会員エリア</text>
+
+      <rect x="500" y="90" width="160" height="34" rx="3" fill="#fafaf7" stroke="#c8553d" stroke-width="2"/>
+      <text x="580" y="112" text-anchor="middle" fill="#c8553d" font-size="11" font-weight="700">管理者エリア</text>
+
+      <!-- Public Area Children -->
+      <line x1="120" y1="124" x2="120" y2="155" stroke="#3f7d5c" stroke-dasharray="2,2"/>
+      <rect x="40" y="155" width="160" height="22" rx="2" fill="#fff" stroke="#3f7d5c"/>
+      <text x="120" y="170" text-anchor="middle" fill="#1a1a1a" font-size="9">トップページ</text>
+
+      <line x1="120" y1="177" x2="120" y2="195" stroke="#3f7d5c" stroke-dasharray="2,2"/>
+      <rect x="40" y="195" width="160" height="22" rx="2" fill="#fff" stroke="#3f7d5c"/>
+      <text x="120" y="210" text-anchor="middle" fill="#1a1a1a" font-size="9">情報コンテンツ（記事）</text>
+
+      <line x1="120" y1="217" x2="120" y2="235" stroke="#3f7d5c" stroke-dasharray="2,2"/>
+      <rect x="40" y="235" width="160" height="22" rx="2" fill="#fff" stroke="#3f7d5c"/>
+      <text x="120" y="250" text-anchor="middle" fill="#1a1a1a" font-size="9">レビュー一覧 / 詳細</text>
+
+      <line x1="120" y1="257" x2="120" y2="275" stroke="#3f7d5c" stroke-dasharray="2,2"/>
+      <rect x="40" y="275" width="160" height="22" rx="2" fill="#fff" stroke="#3f7d5c"/>
+      <text x="120" y="290" text-anchor="middle" fill="#1a1a1a" font-size="9">ブランド一覧 / 詳細</text>
+
+      <line x1="120" y1="297" x2="120" y2="315" stroke="#3f7d5c" stroke-dasharray="2,2"/>
+      <rect x="40" y="315" width="160" height="22" rx="2" fill="#fff" stroke="#3f7d5c"/>
+      <text x="120" y="330" text-anchor="middle" fill="#1a1a1a" font-size="9">商品詳細</text>
+
+      <line x1="120" y1="337" x2="120" y2="355" stroke="#3f7d5c" stroke-dasharray="2,2"/>
+      <rect x="40" y="355" width="160" height="22" rx="2" fill="#fff" stroke="#3f7d5c"/>
+      <text x="120" y="370" text-anchor="middle" fill="#1a1a1a" font-size="9">店舗・場所詳細</text>
+
+      <line x1="120" y1="377" x2="120" y2="395" stroke="#3f7d5c" stroke-dasharray="2,2"/>
+      <rect x="40" y="395" width="160" height="22" rx="2" fill="#fff" stroke="#3f7d5c"/>
+      <text x="120" y="410" text-anchor="middle" fill="#1a1a1a" font-size="9">検索結果</text>
+
+      <!-- Member Area Children -->
+      <line x1="350" y1="124" x2="350" y2="155" stroke="#4a7d9d" stroke-dasharray="2,2"/>
+      <rect x="270" y="155" width="160" height="22" rx="2" fill="#fff" stroke="#4a7d9d"/>
+      <text x="350" y="170" text-anchor="middle" fill="#1a1a1a" font-size="9">会員登録 / ログイン</text>
+
+      <line x1="350" y1="177" x2="350" y2="195" stroke="#4a7d9d" stroke-dasharray="2,2"/>
+      <rect x="270" y="195" width="160" height="22" rx="2" fill="#fff" stroke="#4a7d9d"/>
+      <text x="350" y="210" text-anchor="middle" fill="#1a1a1a" font-size="9">プロフィール編集</text>
+
+      <line x1="350" y1="217" x2="350" y2="235" stroke="#4a7d9d" stroke-dasharray="2,2"/>
+      <rect x="270" y="235" width="160" height="22" rx="2" fill="#fff" stroke="#4a7d9d"/>
+      <text x="350" y="250" text-anchor="middle" fill="#1a1a1a" font-size="9">マイページ</text>
+
+      <line x1="350" y1="257" x2="350" y2="275" stroke="#4a7d9d" stroke-dasharray="2,2"/>
+      <rect x="270" y="275" width="160" height="22" rx="2" fill="#fff" stroke="#4a7d9d"/>
+      <text x="350" y="290" text-anchor="middle" fill="#1a1a1a" font-size="9">レビュー投稿フォーム</text>
+
+      <line x1="350" y1="297" x2="350" y2="315" stroke="#4a7d9d" stroke-dasharray="2,2"/>
+      <rect x="270" y="315" width="160" height="22" rx="2" fill="#fff" stroke="#4a7d9d"/>
+      <text x="350" y="330" text-anchor="middle" fill="#1a1a1a" font-size="9">レビュー編集 / 削除</text>
+
+      <!-- Admin Area Children -->
+      <line x1="580" y1="124" x2="580" y2="155" stroke="#c8553d" stroke-dasharray="2,2"/>
+      <rect x="500" y="155" width="160" height="22" rx="2" fill="#fff" stroke="#c8553d"/>
+      <text x="580" y="170" text-anchor="middle" fill="#1a1a1a" font-size="9">レビュー承認</text>
+
+      <line x1="580" y1="177" x2="580" y2="195" stroke="#c8553d" stroke-dasharray="2,2"/>
+      <rect x="500" y="195" width="160" height="22" rx="2" fill="#fff" stroke="#c8553d"/>
+      <text x="580" y="210" text-anchor="middle" fill="#1a1a1a" font-size="9">ユーザー管理</text>
+
+      <line x1="580" y1="217" x2="580" y2="235" stroke="#c8553d" stroke-dasharray="2,2"/>
+      <rect x="500" y="235" width="160" height="22" rx="2" fill="#fff" stroke="#c8553d"/>
+      <text x="580" y="250" text-anchor="middle" fill="#1a1a1a" font-size="9">ブランド・商品マスタ</text>
+
+      <line x1="580" y1="257" x2="580" y2="275" stroke="#c8553d" stroke-dasharray="2,2"/>
+      <rect x="500" y="275" width="160" height="22" rx="2" fill="#fff" stroke="#c8553d"/>
+      <text x="580" y="290" text-anchor="middle" fill="#1a1a1a" font-size="9">仮登録商品の承認</text>
+
+      <line x1="580" y1="297" x2="580" y2="315" stroke="#c8553d" stroke-dasharray="2,2"/>
+      <rect x="500" y="315" width="160" height="22" rx="2" fill="#fff" stroke="#c8553d"/>
+      <text x="580" y="330" text-anchor="middle" fill="#1a1a1a" font-size="9">記事投稿</text>
+
+      <!-- Legend -->
+      <rect x="40" y="490" width="620" height="70" rx="3" fill="#fafaf7" stroke="#e8e6e0"/>
+      <text x="60" y="510" font-size="10" font-weight="700" fill="#1a1a1a">エリアの色分け</text>
+
+      <rect x="60" y="520" width="14" height="14" fill="#fff" stroke="#3f7d5c" stroke-width="2"/>
+      <text x="80" y="532" font-size="9" fill="#4a4a4a">公開エリア（誰でも閲覧可能）</text>
+
+      <rect x="260" y="520" width="14" height="14" fill="#fff" stroke="#4a7d9d" stroke-width="2"/>
+      <text x="280" y="532" font-size="9" fill="#4a4a4a">会員エリア（要ログイン）</text>
+
+      <rect x="430" y="520" width="14" height="14" fill="#fff" stroke="#c8553d" stroke-width="2"/>
+      <text x="450" y="532" font-size="9" fill="#4a4a4a">管理者エリア（要管理者権限）</text>
+    </svg>
+    <div class="diagram-caption">図 1-1：ナビナビ サイトマップ全体図</div>
+  </div>
+
+  <h2>3つのエリアの役割</h2>
+
+  <table>
+    <thead>
+      <tr><th>エリア</th><th>アクセス権</th><th>主な目的</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>公開エリア</td>
+        <td>誰でも</td>
+        <td>サービスの認知、レビュー閲覧、商品検索。SEO対象</td>
+      </tr>
+      <tr>
+        <td>会員エリア</td>
+        <td>ログインユーザー</td>
+        <td>レビュー投稿、プロフィール管理、マイページ</td>
+      </tr>
+      <tr>
+        <td>管理者エリア</td>
+        <td>管理者権限のみ</td>
+        <td>レビュー承認、コンテンツ投稿、ユーザー・マスタ管理</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============== 1-2 PAGE LIST ============== -->
+<section class="section" id="s1-2">
+  <h1 class="page-title" data-num="1-2">ページ一覧と役割定義<span class="en">Pages & Roles</span></h1>
+
+  <h2>公開エリア（誰でも閲覧可能）</h2>
+
+  <table>
+    <thead>
+      <tr><th>ページ名</th><th>役割</th><th>SEO重要度</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>トップページ</td>
+        <td>サイトの顔。新着レビュー、特集、カテゴリ入り口</td>
+        <td>高</td>
+      </tr>
+      <tr>
+        <td>記事一覧（生活）</td>
+        <td>生活カテゴリの記事一覧</td>
+        <td>中</td>
+      </tr>
+      <tr>
+        <td>記事一覧（旅行）</td>
+        <td>旅行カテゴリの記事一覧</td>
+        <td>中</td>
+      </tr>
+      <tr>
+        <td>記事一覧（留学・ワーホリ）</td>
+        <td>留学・ワーホリカテゴリの記事一覧</td>
+        <td>中</td>
+      </tr>
+      <tr>
+        <td>記事詳細</td>
+        <td>個別記事の詳細表示。日本語・韓国語対応</td>
+        <td>高</td>
+      </tr>
+      <tr>
+        <td>レビュー一覧</td>
+        <td>全レビューを横断的に表示。フィルター・ソート対応</td>
+        <td>高</td>
+      </tr>
+      <tr>
+        <td>レビュー詳細</td>
+        <td>個別レビューの詳細表示</td>
+        <td>中</td>
+      </tr>
+      <tr>
+        <td>ブランド一覧</td>
+        <td>登録されている全ブランドの一覧</td>
+        <td>中</td>
+      </tr>
+      <tr>
+        <td>ブランド詳細</td>
+        <td>ブランドプロフィール、関連商品、関連レビュー</td>
+        <td>高</td>
+      </tr>
+      <tr>
+        <td>商品詳細</td>
+        <td><strong>本サービスの中核ページ。</strong>商品情報、評価集計、レビュー一覧</td>
+        <td>最高</td>
+      </tr>
+      <tr>
+        <td>店舗・場所詳細</td>
+        <td>店舗・場所情報、地図リンク、レビュー一覧</td>
+        <td>高</td>
+      </tr>
+      <tr>
+        <td>検索結果</td>
+        <td>キーワード検索の結果表示</td>
+        <td>低</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>会員エリア（要ログイン）</h2>
+
+  <table>
+    <thead>
+      <tr><th>ページ名</th><th>役割</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>会員登録</td>
+        <td>新規会員登録フォーム。メール認証付き</td>
+      </tr>
+      <tr>
+        <td>ログイン</td>
+        <td>既存会員のログインフォーム</td>
+      </tr>
+      <tr>
+        <td>パスワードリセット</td>
+        <td>パスワード忘れ時のリセットフロー</td>
+      </tr>
+      <tr>
+        <td>プロフィール編集</td>
+        <td>自分のプロフィール情報・属性の編集</td>
+      </tr>
+      <tr>
+        <td>マイページ</td>
+        <td>自分の投稿レビュー一覧、プロフィール表示</td>
+      </tr>
+      <tr>
+        <td>レビュー投稿フォーム</td>
+        <td>5ステップのレビュー投稿フォーム</td>
+      </tr>
+      <tr>
+        <td>レビュー編集・削除</td>
+        <td>自分の過去レビューの編集・削除</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>管理者エリア（要管理者権限）</h2>
+
+  <p>管理者エリアはWordPress標準の管理画面（/wp-admin/）をベースに、ナビナビ専用機能を追加する形で構築します。</p>
+
+  <table>
+    <thead>
+      <tr><th>機能名</th><th>役割</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>レビュー承認</td>
+        <td>承認待ちレビューの確認、承認、差し戻し、PR区分の修正</td>
+      </tr>
+      <tr>
+        <td>ユーザー管理</td>
+        <td>会員一覧、検索、停止、削除</td>
+      </tr>
+      <tr>
+        <td>ブランド管理</td>
+        <td>ブランドの新規登録、編集、削除</td>
+      </tr>
+      <tr>
+        <td>商品マスタ管理</td>
+        <td>商品の新規登録、編集、削除、ブランドとの紐付け</td>
+      </tr>
+      <tr>
+        <td>店舗・場所マスタ管理</td>
+        <td>店舗・場所の新規登録、編集、削除、地図URL登録</td>
+      </tr>
+      <tr>
+        <td>仮登録商品の承認・統合</td>
+        <td>ユーザーが新規入力した商品を、正式登録するか既存商品に統合</td>
+      </tr>
+      <tr>
+        <td>記事投稿</td>
+        <td>情報コンテンツ（記事）の投稿。日本語・韓国語両方を手動投稿</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============== 1-3 URL DESIGN ============== -->
+<section class="section" id="s1-3">
+  <h1 class="page-title" data-num="1-3">URL設計<span class="en">URL Structure</span></h1>
+
+  <h2>URL設計の方針</h2>
+
+  <p>URLは<strong>「ユーザーが見て意味がわかる」「SEOに有利」「将来の拡張に耐える」</strong>の3条件を満たす設計にします。</p>
+
+  <h2>言語切替のURL構造</h2>
+
+  <p>ナビナビは日本語と韓国語の両言語に対応します。言語別のURL構造は以下の通りです。</p>
+
+  <table>
+    <thead>
+      <tr><th>言語</th><th>URL構造</th><th>例</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>日本語（デフォルト）</td>
+        <td>https://example.com/...</td>
+        <td>https://example.com/products/abc/</td>
+      </tr>
+      <tr>
+        <td>韓国語</td>
+        <td>https://example.com/ko/...</td>
+        <td>https://example.com/ko/products/abc/</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>日本語版は<strong>言語コードなし（/）</strong>、韓国語版は<strong>/ko/</strong>プレフィックスを使う構造です。SEO上、日本語版が主要言語と認識されやすい設計です。</p>
+
+  <h2>主要ページのURL一覧</h2>
+
+  <table>
+    <thead>
+      <tr><th>ページ</th><th>URL構造</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>トップページ</td><td>/</td></tr>
+      <tr><td>記事一覧（生活）</td><td>/articles/lifestyle/</td></tr>
+      <tr><td>記事一覧（旅行）</td><td>/articles/travel/</td></tr>
+      <tr><td>記事一覧（留学・ワーホリ）</td><td>/articles/study-abroad/</td></tr>
+      <tr><td>記事詳細</td><td>/articles/{slug}/</td></tr>
+      <tr><td>レビュー一覧</td><td>/reviews/</td></tr>
+      <tr><td>レビュー詳細</td><td>/reviews/{id}/</td></tr>
+      <tr><td>ブランド一覧</td><td>/brands/</td></tr>
+      <tr><td>ブランド詳細</td><td>/brands/{slug}/</td></tr>
+      <tr><td>商品詳細</td><td>/products/{slug}/</td></tr>
+      <tr><td>店舗・場所詳細</td><td>/places/{slug}/</td></tr>
+      <tr><td>検索結果</td><td>/search/?q={query}</td></tr>
+      <tr><td>会員登録</td><td>/register/</td></tr>
+      <tr><td>ログイン</td><td>/login/</td></tr>
+      <tr><td>マイページ</td><td>/my/</td></tr>
+      <tr><td>プロフィール編集</td><td>/my/profile/</td></tr>
+      <tr><td>レビュー投稿フォーム</td><td>/reviews/new/</td></tr>
+      <tr><td>レビュー編集</td><td>/reviews/{id}/edit/</td></tr>
+    </tbody>
+  </table>
+
+  <h2>SEO対策とURL</h2>
+
+  <div class="box info">
+    <h4>SEO最適化のポイント</h4>
+    <p><strong>1. 日本語URLを使わない：</strong>ブランド名や商品名は英数字スラッグに変換します（例：「資生堂」→「shiseido」）。日本語URLはSNS共有時に文字化けの原因になります。</p>
+    <p><strong>2. URLパラメータの最小化：</strong>フィルター・ソートはパラメータで管理しますが、検索エンジンに認識させる必要のないものは正規化（canonical）を設定します。</p>
+    <p><strong>3. パンくずリスト：</strong>各ページに構造化データ（パンくずリスト）を設定し、検索結果で階層構造が表示されるようにします。</p>
+  </div>
+</section>
+
+<!-- ============== PART 2 HEADER ============== -->
+<div class="part-header">
+  <div class="part-num">PART  2</div>
+  <h1>データ設計</h1>
+  <div class="part-desc">
+    本書のコアとなる章です。ナビナビが扱うデータの種類、それぞれの構造、相互関係を定義します。クライアントが「構造部分が特に重要」とご指摘された通り、本サービスの差別化を実現する基盤がここにあります。
+  </div>
+  <div class="part-contents">
+    <div class="part-content-item"><strong>2-1</strong>エンティティ関係図（ER図）</div>
+    <div class="part-content-item"><strong>2-2</strong>エンティティ詳細仕様</div>
+    <div class="part-content-item"><strong>2-3</strong>レビューデータの構造</div>
+    <div class="part-content-item"><strong>2-4</strong>ユーザープロフィール設計</div>
+    <div class="part-content-item"><strong>2-5</strong>カテゴリ別評価項目</div>
+    <div class="part-content-item"><strong>2-6</strong>属性スナップショット方式</div>
+  </div>
+</div>
+
+<!-- ============== 2-1 ER DIAGRAM ============== -->
+<section class="section" id="s2-1">
+  <h1 class="page-title" data-num="2-1">エンティティ関係図（ER図）<span class="en">Entity Relationship Diagram</span></h1>
+
+  <h2>エンティティとは</h2>
+
+  <p><strong>「エンティティ」</strong>とは、システム内で扱う「データのまとまり」のことです。ナビナビでは、以下の5つの主要エンティティを扱います。</p>
+
+  <ul>
+    <li><strong>ブランド：</strong>商品の上位エンティティ（例：資生堂、エチュード）</li>
+    <li><strong>商品：</strong>レビュー対象となる物品（例：エチュードのリップティント）</li>
+    <li><strong>店舗・場所：</strong>レビュー対象となる場所（例：明洞のサウナ）</li>
+    <li><strong>レビュー：</strong>ユーザーが投稿する評価・感想</li>
+    <li><strong>ユーザー：</strong>レビューを投稿する人</li>
+  </ul>
+
+  <h2>エンティティ関係図</h2>
+
+  <div class="diagram-container">
+    <svg viewBox="0 0 700 480" xmlns="http://www.w3.org/2000/svg" style="font-family: 'Noto Sans JP', sans-serif;">
+      <!-- USER -->
+      <rect x="40" y="30" width="160" height="100" rx="3" fill="#fafaf7" stroke="#4a7d9d" stroke-width="2"/>
+      <rect x="40" y="30" width="160" height="22" rx="3" fill="#4a7d9d"/>
+      <text x="120" y="46" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">ユーザー</text>
+      <text x="120" y="65" text-anchor="middle" font-size="8.5" fill="#4a4a4a">user</text>
+      <line x1="50" y1="72" x2="190" y2="72" stroke="#e8e6e0"/>
+      <text x="50" y="86" font-size="8.5" fill="#1a1a1a">ID（主キー）</text>
+      <text x="50" y="100" font-size="8.5" fill="#1a1a1a">表示名・メールアドレス</text>
+      <text x="50" y="114" font-size="8.5" fill="#1a1a1a">プロフィール属性（多数）</text>
+
+      <!-- BRAND -->
+      <rect x="500" y="30" width="160" height="100" rx="3" fill="#fafaf7" stroke="#3f7d5c" stroke-width="2"/>
+      <rect x="500" y="30" width="160" height="22" rx="3" fill="#3f7d5c"/>
+      <text x="580" y="46" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">ブランド</text>
+      <text x="580" y="65" text-anchor="middle" font-size="8.5" fill="#4a4a4a">brand</text>
+      <line x1="510" y1="72" x2="650" y2="72" stroke="#e8e6e0"/>
+      <text x="510" y="86" font-size="8.5" fill="#1a1a1a">ID（主キー）</text>
+      <text x="510" y="100" font-size="8.5" fill="#1a1a1a">ブランド名</text>
+      <text x="510" y="114" font-size="8.5" fill="#1a1a1a">ロゴ・説明・国・公式URL</text>
+
+      <!-- PRODUCT -->
+      <rect x="370" y="180" width="160" height="100" rx="3" fill="#fafaf7" stroke="#d4a84b" stroke-width="2"/>
+      <rect x="370" y="180" width="160" height="22" rx="3" fill="#d4a84b"/>
+      <text x="450" y="196" text-anchor="middle" fill="#1a1a1a" font-size="11" font-weight="700">商品</text>
+      <text x="450" y="215" text-anchor="middle" font-size="8.5" fill="#4a4a4a">product</text>
+      <line x1="380" y1="222" x2="520" y2="222" stroke="#e8e6e0"/>
+      <text x="380" y="236" font-size="8.5" fill="#1a1a1a">ID（主キー）</text>
+      <text x="380" y="250" font-size="8.5" fill="#1a1a1a">商品名・カテゴリ・価格</text>
+      <text x="380" y="264" font-size="8.5" fill="#1a1a1a">ブランドID（外部キー）</text>
+
+      <!-- PLACE -->
+      <rect x="540" y="180" width="120" height="100" rx="3" fill="#fafaf7" stroke="#7a6ba8" stroke-width="2"/>
+      <rect x="540" y="180" width="120" height="22" rx="3" fill="#7a6ba8"/>
+      <text x="600" y="196" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">店舗・場所</text>
+      <text x="600" y="215" text-anchor="middle" font-size="8.5" fill="#4a4a4a">place</text>
+      <line x1="550" y1="222" x2="650" y2="222" stroke="#e8e6e0"/>
+      <text x="550" y="236" font-size="8.5" fill="#1a1a1a">ID（主キー）</text>
+      <text x="550" y="250" font-size="8.5" fill="#1a1a1a">店舗・場所名</text>
+      <text x="550" y="264" font-size="8.5" fill="#1a1a1a">住所・地図URL</text>
+
+      <!-- REVIEW -->
+      <rect x="200" y="320" width="200" height="130" rx="3" fill="#fae8e3" stroke="#c8553d" stroke-width="2"/>
+      <rect x="200" y="320" width="200" height="22" rx="3" fill="#c8553d"/>
+      <text x="300" y="336" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">レビュー</text>
+      <text x="300" y="355" text-anchor="middle" font-size="8.5" fill="#4a4a4a">review</text>
+      <line x1="210" y1="362" x2="390" y2="362" stroke="#e8e6e0"/>
+      <text x="210" y="376" font-size="8.5" fill="#1a1a1a">ID（主キー）</text>
+      <text x="210" y="390" font-size="8.5" fill="#1a1a1a">投稿者ID（外部キー）</text>
+      <text x="210" y="404" font-size="8.5" fill="#1a1a1a">対象ID（商品/場所）</text>
+      <text x="210" y="418" font-size="8.5" fill="#1a1a1a">本文・評価・PR区分</text>
+      <text x="210" y="432" font-size="8.5" fill="#1a1a1a" font-weight="700" fill="#c8553d">★ 投稿時属性スナップショット</text>
+
+      <!-- Relationships with cardinality -->
+      <!-- user -> review (1:N) -->
+      <line x1="120" y1="130" x2="240" y2="320" stroke="#4a7d9d" stroke-width="2"/>
+      <text x="135" y="200" font-size="9" fill="#4a7d9d" font-weight="700">1</text>
+      <text x="220" y="295" font-size="9" fill="#4a7d9d" font-weight="700">N</text>
+      <text x="160" y="245" font-size="9" fill="#4a4a4a" font-style="italic">投稿する</text>
+
+      <!-- brand -> product (1:N) -->
+      <line x1="580" y1="130" x2="500" y2="180" stroke="#3f7d5c" stroke-width="2"/>
+      <text x="575" y="148" font-size="9" fill="#3f7d5c" font-weight="700">1</text>
+      <text x="500" y="175" font-size="9" fill="#3f7d5c" font-weight="700">N</text>
+      <text x="510" y="160" font-size="9" fill="#4a4a4a" font-style="italic">所属</text>
+
+      <!-- product -> review (1:N) -->
+      <line x1="430" y1="280" x2="370" y2="320" stroke="#d4a84b" stroke-width="2"/>
+      <text x="430" y="298" font-size="9" fill="#b8902f" font-weight="700">1</text>
+      <text x="350" y="320" font-size="9" fill="#b8902f" font-weight="700">N</text>
+      <text x="368" y="310" font-size="9" fill="#4a4a4a" font-style="italic">対象</text>
+
+      <!-- place -> review (1:N) -->
+      <line x1="580" y1="280" x2="400" y2="380" stroke="#7a6ba8" stroke-width="2"/>
+      <text x="572" y="298" font-size="9" fill="#7a6ba8" font-weight="700">1</text>
+      <text x="408" y="380" font-size="9" fill="#7a6ba8" font-weight="700">N</text>
+      <text x="475" y="345" font-size="9" fill="#4a4a4a" font-style="italic">対象</text>
+    </svg>
+    <div class="diagram-caption">図 2-1：ナビナビ ER図（エンティティ関係図）</div>
+  </div>
+
+  <h2>関係性の読み方</h2>
+
+  <p>図中の<strong>「1」と「N」</strong>は、エンティティ間の関係性を表します。</p>
+
+  <ul>
+    <li><strong>1人のユーザーは、N件（複数）のレビューを投稿できる</strong></li>
+    <li><strong>1つのブランドには、N個（複数）の商品が所属できる</strong></li>
+    <li><strong>1つの商品には、N件（複数）のレビューがつく</strong></li>
+    <li><strong>1つの店舗・場所には、N件（複数）のレビューがつく</strong></li>
+  </ul>
+
+  <p>レビューは、商品または店舗・場所のいずれかに紐付きます。商品レビューと場所レビューを切り分けることで、検索やフィルターを正確に行えます。</p>
+</section>
+
+<!-- ============== 2-2 ENTITY DETAILS ============== -->
+<section class="section" id="s2-2">
+  <h1 class="page-title" data-num="2-2">エンティティ詳細仕様<span class="en">Entity Specifications</span></h1>
+
+  <p>各エンティティが保持するデータ項目（属性）の詳細を定義します。</p>
+
+  <h2>① ブランド エンティティ</h2>
+
+  <table>
+    <thead>
+      <tr><th>項目名</th><th>型</th><th>必須</th><th>備考</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>ID</td><td>数値</td><td>○</td><td>主キー（自動採番）</td></tr>
+      <tr><td>ブランド名</td><td>テキスト</td><td>○</td><td>表示用（日本語または英語）</td></tr>
+      <tr><td>ブランド名（韓国語）</td><td>テキスト</td><td></td><td>韓国語表示用</td></tr>
+      <tr><td>スラッグ</td><td>英数字</td><td>○</td><td>URL用（例：shiseido）</td></tr>
+      <tr><td>ロゴ画像</td><td>画像</td><td></td><td>ブランドロゴ</td></tr>
+      <tr><td>説明</td><td>テキスト</td><td></td><td>ブランドの紹介文</td></tr>
+      <tr><td>説明（韓国語）</td><td>テキスト</td><td></td><td>韓国語紹介文</td></tr>
+      <tr><td>国</td><td>選択</td><td>○</td><td>日本／韓国／その他</td></tr>
+      <tr><td>公式URL</td><td>URL</td><td></td><td>公式サイトへのリンク</td></tr>
+      <tr><td>登録日時</td><td>日時</td><td>○</td><td>自動記録</td></tr>
+    </tbody>
+  </table>
+
+  <h2>② 商品 エンティティ</h2>
+
+  <table>
+    <thead>
+      <tr><th>項目名</th><th>型</th><th>必須</th><th>備考</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>ID</td><td>数値</td><td>○</td><td>主キー</td></tr>
+      <tr><td>商品名</td><td>テキスト</td><td>○</td><td>表示用</td></tr>
+      <tr><td>商品名（韓国語）</td><td>テキスト</td><td></td><td>韓国語表示</td></tr>
+      <tr><td>スラッグ</td><td>英数字</td><td>○</td><td>URL用</td></tr>
+      <tr><td>ブランドID</td><td>数値</td><td>○</td><td>ブランドエンティティへの参照</td></tr>
+      <tr><td>カテゴリ</td><td>選択</td><td>○</td><td>コスメ／生活用品／食品 等</td></tr>
+      <tr><td>サブカテゴリ</td><td>選択</td><td></td><td>例：ファンデ、リップ、アイシャドウ</td></tr>
+      <tr><td>商品画像</td><td>画像</td><td></td><td>メイン画像（複数枚可）</td></tr>
+      <tr><td>商品説明</td><td>テキスト</td><td></td><td>商品の説明文</td></tr>
+      <tr><td>価格帯</td><td>選択</td><td></td><td>〜1000円／1000-3000円 等</td></tr>
+      <tr><td>容量・サイズ</td><td>テキスト</td><td></td><td>例：30ml、60g</td></tr>
+      <tr><td>登録ステータス</td><td>選択</td><td>○</td><td>正式登録／仮登録／非公開</td></tr>
+      <tr><td>登録日時</td><td>日時</td><td>○</td><td>自動記録</td></tr>
+    </tbody>
+  </table>
+
+  <div class="box info">
+    <h4>「仮登録」ステータスについて</h4>
+    <p>ユーザーがレビュー投稿時に「該当する商品がない」とき、新規入力した商品は<strong>「仮登録」</strong>状態で保存されます。管理者がそれを確認し、(1)正式商品として登録、(2)既存商品に統合、(3)却下のいずれかを判断します。詳細は4-4章で解説します。</p>
+  </div>
+
+  <h2>③ 店舗・場所 エンティティ</h2>
+
+  <table>
+    <thead>
+      <tr><th>項目名</th><th>型</th><th>必須</th><th>備考</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>ID</td><td>数値</td><td>○</td><td>主キー</td></tr>
+      <tr><td>店舗・場所名</td><td>テキスト</td><td>○</td><td>表示用</td></tr>
+      <tr><td>店舗・場所名（韓国語）</td><td>テキスト</td><td></td><td>韓国語表示</td></tr>
+      <tr><td>スラッグ</td><td>英数字</td><td>○</td><td>URL用</td></tr>
+      <tr><td>ブランドID</td><td>数値</td><td></td><td>関連ブランドがあれば参照</td></tr>
+      <tr><td>カテゴリ</td><td>選択</td><td>○</td><td>飲食／観光地／サロン／ホテル 等</td></tr>
+      <tr><td>住所</td><td>テキスト</td><td></td><td>建物名、番地等</td></tr>
+      <tr><td>所在国</td><td>選択</td><td>○</td><td>日本／韓国／その他</td></tr>
+      <tr><td>Google Map URL</td><td>URL</td><td></td><td>外部リンク</td></tr>
+      <tr><td>Naver Map URL</td><td>URL</td><td></td><td>外部リンク（韓国の場合）</td></tr>
+      <tr><td>公式URL</td><td>URL</td><td></td><td>公式サイト</td></tr>
+      <tr><td>営業時間</td><td>テキスト</td><td></td><td>表示用</td></tr>
+      <tr><td>登録ステータス</td><td>選択</td><td>○</td><td>正式登録／仮登録／非公開</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============== 2-3 REVIEW DATA ============== -->
+<section class="section" id="s2-3">
+  <h1 class="page-title" data-num="2-3">レビューデータの構造<span class="en">Review Data Structure</span></h1>
+
+  <p>レビューは本サービスの中核となる最も重要なデータです。本章では、レビューが保持するすべての項目を詳細に定義します。</p>
+
+  <h2>レビュー基本情報</h2>
+
+  <table>
+    <thead>
+      <tr><th>項目名</th><th>型</th><th>必須</th><th>備考</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>ID</td><td>数値</td><td>○</td><td>主キー</td></tr>
+      <tr><td>投稿者ID</td><td>数値</td><td>○</td><td>ユーザーへの参照</td></tr>
+      <tr><td>対象タイプ</td><td>選択</td><td>○</td><td>商品（モノ）／場所（コト）</td></tr>
+      <tr><td>対象ID</td><td>数値</td><td>○</td><td>商品IDまたは場所ID</td></tr>
+      <tr><td>タイトル</td><td>テキスト</td><td>○</td><td>レビューのタイトル（最大100文字）</td></tr>
+      <tr><td>本文</td><td>テキスト</td><td>○</td><td>レビュー本文（最低50文字、最大3000文字）</td></tr>
+      <tr><td>投稿言語</td><td>選択</td><td>○</td><td>日本語／韓国語</td></tr>
+      <tr><td>翻訳本文</td><td>テキスト</td><td></td><td>DeepL自動翻訳＋手動修正</td></tr>
+      <tr><td>投稿日時</td><td>日時</td><td>○</td><td>自動記録</td></tr>
+      <tr><td>最終更新日時</td><td>日時</td><td>○</td><td>自動記録</td></tr>
+      <tr><td>ステータス</td><td>選択</td><td>○</td><td>承認待ち／公開／差し戻し／非公開</td></tr>
+    </tbody>
+  </table>
+
+  <h2>PR区分・評価情報</h2>
+
+  <table>
+    <thead>
+      <tr><th>項目名</th><th>型</th><th>必須</th><th>備考</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>PR区分</td><td>選択</td><td>○</td><td>自費購入／プレゼント／PR</td></tr>
+      <tr><td>総合評価</td><td>数値</td><td>○</td><td>0.5〜5.0（0.5刻み）</td></tr>
+      <tr><td>カテゴリ別評価</td><td>複数項目</td><td></td><td>カテゴリにより異なる（2-5章参照）</td></tr>
+      <tr><td>バリエーション</td><td>テキスト</td><td></td><td>カラー、サイズ、種類等</td></tr>
+      <tr><td>購入・利用時期</td><td>日付</td><td></td><td>不明可</td></tr>
+      <tr><td>添付画像</td><td>画像</td><td></td><td>最大5枚、各5MB以下</td></tr>
+    </tbody>
+  </table>
+
+  <h2>PR区分の3種類</h2>
+
+  <p>本サービスのステマ対策の核となる項目です。レビュー投稿時に必ず選択させ、レビュー一覧でも明示します。</p>
+
+  <table>
+    <thead>
+      <tr><th>区分</th><th>表示</th><th>意味</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="pr-badge pr-self">自費購入</span></td>
+        <td>緑枠</td>
+        <td>自分のお金で購入した商品・サービスのレビュー</td>
+      </tr>
+      <tr>
+        <td><span class="pr-badge pr-gift">プレゼント</span></td>
+        <td>紫枠</td>
+        <td>家族・友人からの贈り物のレビュー（金銭授受なし）</td>
+      </tr>
+      <tr>
+        <td><span class="pr-badge pr-pr">PR</span></td>
+        <td>赤塗り</td>
+        <td>商品提供・モニター参加・招待・対価を受けたレビュー</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>レビューのステータス遷移</h2>
+
+  <div class="diagram-container">
+    <svg viewBox="0 0 700 280" xmlns="http://www.w3.org/2000/svg" style="font-family: 'Noto Sans JP', sans-serif;">
+      <!-- ユーザー投稿 -->
+      <rect x="20" y="120" width="120" height="50" rx="3" fill="#1a1a1a"/>
+      <text x="80" y="142" text-anchor="middle" fill="#fff" font-size="10" font-weight="700">ユーザー投稿</text>
+      <text x="80" y="158" text-anchor="middle" fill="#fff" font-size="8.5">（自動）</text>
+
+      <!-- 承認待ち -->
+      <rect x="200" y="120" width="120" height="50" rx="3" fill="#faf1dc" stroke="#d4a84b" stroke-width="2"/>
+      <text x="260" y="142" text-anchor="middle" fill="#b8902f" font-size="10" font-weight="700">承認待ち</text>
+      <text x="260" y="158" text-anchor="middle" fill="#b8902f" font-size="8.5">pending</text>
+
+      <!-- 公開 -->
+      <rect x="450" y="40" width="120" height="50" rx="3" fill="#e9f3ed" stroke="#3f7d5c" stroke-width="2"/>
+      <text x="510" y="62" text-anchor="middle" fill="#3f7d5c" font-size="10" font-weight="700">公開</text>
+      <text x="510" y="78" text-anchor="middle" fill="#3f7d5c" font-size="8.5">published</text>
+
+      <!-- 差し戻し -->
+      <rect x="450" y="120" width="120" height="50" rx="3" fill="#fae8e3" stroke="#c8553d" stroke-width="2"/>
+      <text x="510" y="142" text-anchor="middle" fill="#c8553d" font-size="10" font-weight="700">差し戻し</text>
+      <text x="510" y="158" text-anchor="middle" fill="#c8553d" font-size="8.5">rejected</text>
+
+      <!-- 非公開 -->
+      <rect x="450" y="200" width="120" height="50" rx="3" fill="#f0f0f0" stroke="#888" stroke-width="2"/>
+      <text x="510" y="222" text-anchor="middle" fill="#555" font-size="10" font-weight="700">非公開</text>
+      <text x="510" y="238" text-anchor="middle" fill="#555" font-size="8.5">private</text>
+
+      <!-- Arrows -->
+      <line x1="140" y1="145" x2="200" y2="145" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+      <line x1="320" y1="135" x2="450" y2="68" stroke="#3f7d5c" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
+      <text x="380" y="92" font-size="8.5" fill="#3f7d5c" font-weight="700">承認</text>
+
+      <line x1="320" y1="145" x2="450" y2="145" stroke="#c8553d" stroke-width="1.5" marker-end="url(#arrowRed)"/>
+      <text x="370" y="138" font-size="8.5" fill="#c8553d" font-weight="700">差し戻し</text>
+
+      <line x1="320" y1="155" x2="450" y2="222" stroke="#888" stroke-width="1.5" marker-end="url(#arrowGray)"/>
+      <text x="370" y="200" font-size="8.5" fill="#555" font-weight="700">違反検出</text>
+
+      <line x1="510" y1="120" x2="510" y2="90" stroke="#3f7d5c" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#arrowGreen)"/>
+      <text x="540" y="105" font-size="8.5" fill="#3f7d5c">再申請</text>
+
+      <line x1="510" y1="200" x2="510" y2="90" stroke="#3f7d5c" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#arrowGreen)"/>
+      <text x="540" y="160" font-size="8.5" fill="#3f7d5c">公開</text>
+
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#1a1a1a"/>
+        </marker>
+        <marker id="arrowGreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#3f7d5c"/>
+        </marker>
+        <marker id="arrowRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#c8553d"/>
+        </marker>
+        <marker id="arrowGray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#888"/>
+        </marker>
+      </defs>
+    </svg>
+    <div class="diagram-caption">図 2-3：レビューのステータス遷移</div>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>ステータス</th><th>意味</th><th>表示</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="status-badge status-pending">承認待ち</span></td>
+        <td>ユーザーが投稿後、管理者の承認を待つ状態</td>
+        <td>投稿者のマイページのみ</td>
+      </tr>
+      <tr>
+        <td><span class="status-badge status-published">公開</span></td>
+        <td>承認され、サイト上で公開中</td>
+        <td>全ユーザーから見える</td>
+      </tr>
+      <tr>
+        <td><span class="status-badge status-rejected">差し戻し</span></td>
+        <td>修正が必要として戻された状態</td>
+        <td>投稿者のマイページに修正コメント付きで表示</td>
+      </tr>
+      <tr>
+        <td><span class="status-badge status-private">非公開</span></td>
+        <td>ガイドライン違反等で公開停止</td>
+        <td>誰からも見えない</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============== 2-4 USER PROFILE ============== -->
+<section class="section" id="s2-4">
+  <h1 class="page-title" data-num="2-4">ユーザープロフィール設計<span class="en">User Profile Design</span></h1>
+
+  <p>ナビナビでは、レビューの説得力を高めるため、ユーザーが詳細なプロフィール情報を登録できる仕組みを採用します。これらの情報は、レビュー閲覧時に「どんな人が書いたレビューか」を判断する材料になります。</p>
+
+  <h2>ユーザー基本情報</h2>
+
+  <table>
+    <thead>
+      <tr><th>項目名</th><th>型</th><th>必須</th><th>備考</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>ID</td><td>数値</td><td>○</td><td>主キー</td></tr>
+      <tr><td>メールアドレス</td><td>メール</td><td>○</td><td>ログインID兼用</td></tr>
+      <tr><td>表示名（ニックネーム）</td><td>テキスト</td><td>○</td><td>2〜20文字</td></tr>
+      <tr><td>パスワード</td><td>暗号化</td><td>○</td><td>8文字以上</td></tr>
+      <tr><td>アバター画像</td><td>画像</td><td></td><td>任意。デフォルトはイニシャル</td></tr>
+      <tr><td>登録日時</td><td>日時</td><td>○</td><td>自動記録</td></tr>
+      <tr><td>最終ログイン日時</td><td>日時</td><td>○</td><td>自動記録</td></tr>
+      <tr><td>メール認証済み</td><td>真偽</td><td>○</td><td>登録時のメール認証フラグ</td></tr>
+    </tbody>
+  </table>
+
+  <h2>プロフィール属性（共通）</h2>
+
+  <p>すべてのユーザーが登録できる属性です。レビュー閲覧時にユーザータグとして表示されます。</p>
+
+  <table>
+    <thead>
+      <tr><th>項目名</th><th>型</th><th>選択肢</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>国籍</td><td>選択</td><td>日本／韓国／日本+韓国（ハーフ）／その他／非公開</td></tr>
+      <tr><td>滞在状況</td><td>選択</td><td>日本在住／韓国在住／日韓を行き来／海外在住／一時滞在／非公開</td></tr>
+      <tr><td>育った環境</td><td>選択</td><td>日本育ち／韓国育ち／海外育ち／非公開</td></tr>
+      <tr><td>使用言語</td><td>複数選択</td><td>日本語／韓国語／英語／中国語／その他</td></tr>
+      <tr><td>年齢層</td><td>選択</td><td>10代／20代前半／20代後半／30代／40代／50代以上／非公開</td></tr>
+      <tr><td>性別</td><td>選択</td><td>女性／男性／その他／非公開</td></tr>
+    </tbody>
+  </table>
+
+  <h2>コスメ関連属性（任意）</h2>
+
+  <p>コスメカテゴリのレビューを書く際に表示される属性です。コスメ以外のレビューでは非表示にします。</p>
+
+  <table>
+    <thead>
+      <tr><th>項目名</th><th>型</th><th>選択肢</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>肌質</td><td>選択</td><td>乾燥肌／脂性肌／混合肌／普通肌／敏感肌／非公開</td></tr>
+      <tr><td>肌トーン</td><td>選択</td><td>イエベ春／イエベ秋／ブルベ夏／ブルベ冬／不明／非公開</td></tr>
+      <tr><td>パーソナルカラー</td><td>選択</td><td>診断済み／自己判断／未診断／非公開</td></tr>
+      <tr><td>肌悩み</td><td>複数選択</td><td>ニキビ／毛穴／シミ／くすみ／乾燥／敏感／なし</td></tr>
+    </tbody>
+  </table>
+
+  <h2>プロフィール公開ポリシー</h2>
+
+  <div class="box info">
+    <h4>非公開設定の重要性</h4>
+    <p>各属性には<strong>「非公開」</strong>選択肢を必ず設けます。これにより、ユーザーは公開したい情報のみを公開できます。プライバシー保護の観点から重要な設計です。</p>
+    <p>レビュー詳細画面では、ユーザーが公開設定している属性のみが表示されます。</p>
+  </div>
+
+  <h2>プロフィール表示パターン</h2>
+
+  <p>同じユーザーでも、レビューのカテゴリによって表示する属性を変えます。</p>
+
+  <table>
+    <thead>
+      <tr><th>レビューカテゴリ</th><th>表示する属性</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>コスメ（ファンデ、リップ等）</td>
+        <td>国籍 / 肌質 / 肌トーン / 年齢層</td>
+      </tr>
+      <tr>
+        <td>店舗・場所</td>
+        <td>国籍 / 滞在状況 / 育った環境</td>
+      </tr>
+      <tr>
+        <td>食品・生活用品</td>
+        <td>国籍 / 滞在状況 / 年齢層</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============== 2-5 CATEGORY RATING ============== -->
+<section class="section" id="s2-5">
+  <h1 class="page-title" data-num="2-5">カテゴリ別評価項目<span class="en">Category-Specific Ratings</span></h1>
+
+  <p>すべてのレビューに共通する<strong>「総合評価」</strong>に加えて、カテゴリごとに<strong>固有の評価項目</strong>を用意します。これにより、商品ごとの細かい強み・弱みが可視化され、レビューの情報価値が高まります。</p>
+
+  <h2>カテゴリ別評価の例</h2>
+
+  <h3>コスメ：ファンデーション</h3>
+  <table>
+    <thead>
+      <tr><th>評価項目</th><th>説明</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>崩れにくさ</td><td>時間が経っても崩れにくいか（5段階）</td></tr>
+      <tr><td>化粧ノリ</td><td>肌に馴染むか（5段階）</td></tr>
+      <tr><td>発色・カラー</td><td>仕上がりの色味（5段階）</td></tr>
+      <tr><td>肌への負担</td><td>敏感肌でも使えるか（5段階）</td></tr>
+    </tbody>
+  </table>
+
+  <h3>コスメ：リップ・ティント</h3>
+  <table>
+    <thead>
+      <tr><th>評価項目</th><th>説明</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>発色</td><td>色の鮮やかさ（5段階）</td></tr>
+      <tr><td>持続力</td><td>食事や水分でも落ちにくいか（5段階）</td></tr>
+      <tr><td>保湿力</td><td>唇の乾燥を感じないか（5段階）</td></tr>
+      <tr><td>使いやすさ</td><td>塗りやすさ、ぼかしやすさ（5段階）</td></tr>
+    </tbody>
+  </table>
+
+  <h3>コスメ：アイシャドウ</h3>
+  <table>
+    <thead>
+      <tr><th>評価項目</th><th>説明</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>発色</td><td>1度塗りで色が出るか（5段階）</td></tr>
+      <tr><td>粉落ち</td><td>飛散・粉ハネしないか（5段階）</td></tr>
+      <tr><td>ブレンドしやすさ</td><td>グラデーションを作りやすいか（5段階）</td></tr>
+      <tr><td>持続力</td><td>夕方まで持つか（5段階）</td></tr>
+    </tbody>
+  </table>
+
+  <h3>店舗・場所：飲食店</h3>
+  <table>
+    <thead>
+      <tr><th>評価項目</th><th>説明</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>味</td><td>料理のおいしさ（5段階）</td></tr>
+      <tr><td>サービス</td><td>接客の質（5段階）</td></tr>
+      <tr><td>コスパ</td><td>価格と内容のバランス（5段階）</td></tr>
+      <tr><td>雰囲気</td><td>店内の雰囲気・居心地（5段階）</td></tr>
+    </tbody>
+  </table>
+
+  <h3>店舗・場所：観光地・サウナ等</h3>
+  <table>
+    <thead>
+      <tr><th>評価項目</th><th>説明</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>立地・アクセス</td><td>交通の便（5段階）</td></tr>
+      <tr><td>清潔さ</td><td>施設の衛生状態（5段階）</td></tr>
+      <tr><td>満足度</td><td>体験の満足度（5段階）</td></tr>
+      <tr><td>コスパ</td><td>価格と内容のバランス（5段階）</td></tr>
+    </tbody>
+  </table>
+
+  <h2>初期ローンチ時の対応カテゴリ</h2>
+
+  <p>初期ローンチ時は<strong>コスメを主軸</strong>とするため、以下を優先実装します。それ以外のカテゴリは、ローンチ後に順次追加していきます。</p>
+
+  <ul>
+    <li><strong>コスメ：</strong>ファンデーション、リップ・ティント、アイシャドウ、スキンケア各種</li>
+    <li><strong>店舗・場所：</strong>飲食店、観光地、サウナ・スパ、サロン</li>
+    <li><strong>その他：</strong>食品、生活用品（総合評価のみ）</li>
+  </ul>
+
+  <div class="box tip">
+    <h4>カテゴリ別評価の表示</h4>
+    <p>レビュー詳細画面では、総合評価の下に、カテゴリ別評価を<strong>バーグラフ</strong>で表示します。一目で「どの項目が高評価か」を理解できる設計です。</p>
+    <p>商品詳細画面では、その商品に投稿された全レビューのカテゴリ別評価を<strong>平均値</strong>で集計表示します。</p>
+  </div>
+</section>
+
+<!-- ============== 2-6 SNAPSHOT ============== -->
+<section class="section" id="s2-6">
+  <h1 class="page-title" data-num="2-6">ユーザー属性スナップショット方式<span class="en">User Attribute Snapshot</span></h1>
+
+  <h2>本章の重要性</h2>
+
+  <div class="box danger">
+    <h4>本サービスの差別化を実現する重要設計</h4>
+    <p>本章で説明する「スナップショット方式」は、ナビナビが他のレビューサイトと差別化される<strong>本質的な設計判断</strong>です。クライアント様には、この方式の意図を必ずご理解いただきたい部分です。</p>
+  </div>
+
+  <h2>解決すべき課題</h2>
+
+  <p>ユーザーはレビューを投稿した後、プロフィール情報を変更することがあります。例えば：</p>
+
+  <ul>
+    <li>「韓国留学中」→「日本に帰国」へ変更</li>
+    <li>「乾燥肌」→「混合肌」へ変更</li>
+    <li>「20代前半」→「20代後半」へ変更</li>
+  </ul>
+
+  <p>このとき、過去のレビューに表示されるユーザー属性は<strong>「投稿時点」と「現在」のどちらを表示すべきか</strong>という問題が発生します。</p>
+
+  <h2>2つの方式の比較</h2>
+
+  <div class="diagram-container">
+    <svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg" style="font-family: 'Noto Sans JP', sans-serif;">
+      <!-- 方式A：参照方式（NG） -->
+      <text x="180" y="20" text-anchor="middle" font-size="11" font-weight="700" fill="#c8553d">方式A：常に最新プロフィールを参照（採用しない）</text>
+
+      <rect x="20" y="40" width="100" height="60" rx="3" fill="#fafaf7" stroke="#1a1a1a"/>
+      <text x="70" y="58" text-anchor="middle" font-size="9" font-weight="700">レビューA</text>
+      <text x="70" y="74" text-anchor="middle" font-size="8" fill="#4a4a4a">2024年投稿</text>
+      <text x="70" y="90" text-anchor="middle" font-size="8" fill="#4a4a4a">「乾燥肌で...」</text>
+
+      <rect x="240" y="40" width="100" height="60" rx="3" fill="#fafaf7" stroke="#1a1a1a"/>
+      <text x="290" y="58" text-anchor="middle" font-size="9" font-weight="700">レビューB</text>
+      <text x="290" y="74" text-anchor="middle" font-size="8" fill="#4a4a4a">2025年投稿</text>
+      <text x="290" y="90" text-anchor="middle" font-size="8" fill="#4a4a4a">「混合肌に...」</text>
+
+      <!-- arrows pointing up -->
+      <line x1="70" y1="100" x2="180" y2="135" stroke="#c8553d" stroke-width="1.5" marker-end="url(#arrowDown)"/>
+      <line x1="290" y1="100" x2="180" y2="135" stroke="#c8553d" stroke-width="1.5" marker-end="url(#arrowDown)"/>
+
+      <rect x="120" y="135" width="120" height="60" rx="3" fill="#fae8e3" stroke="#c8553d" stroke-width="2"/>
+      <text x="180" y="155" text-anchor="middle" font-size="9" font-weight="700" fill="#c8553d">プロフィール</text>
+      <text x="180" y="172" text-anchor="middle" font-size="9" fill="#1a1a1a">現在：混合肌</text>
+      <text x="180" y="186" text-anchor="middle" font-size="8" fill="#4a4a4a">（最新値のみ保存）</text>
+
+      <rect x="20" y="220" width="320" height="100" rx="3" fill="#fff" stroke="#c8553d" stroke-dasharray="4,2"/>
+      <text x="180" y="240" text-anchor="middle" font-size="9" font-weight="700" fill="#c8553d">問題点</text>
+      <text x="30" y="262" font-size="8.5" fill="#1a1a1a">レビューAを表示すると、属性は</text>
+      <text x="30" y="278" font-size="8.5" fill="#c8553d" font-weight="700">「混合肌」と表示されてしまう</text>
+      <text x="30" y="294" font-size="8.5" fill="#1a1a1a">が、本文では「乾燥肌で...」と</text>
+      <text x="30" y="310" font-size="8.5" fill="#1a1a1a">書かれており、矛盾が発生</text>
+
+      <!-- 方式B：スナップショット方式（採用） -->
+      <text x="540" y="20" text-anchor="middle" font-size="11" font-weight="700" fill="#3f7d5c">方式B：スナップショット保存（採用）</text>
+
+      <rect x="380" y="40" width="100" height="80" rx="3" fill="#e9f3ed" stroke="#3f7d5c" stroke-width="2"/>
+      <text x="430" y="58" text-anchor="middle" font-size="9" font-weight="700">レビューA</text>
+      <text x="430" y="74" text-anchor="middle" font-size="8" fill="#4a4a4a">2024年投稿</text>
+      <text x="430" y="90" text-anchor="middle" font-size="8" fill="#4a4a4a">「乾燥肌で...」</text>
+      <text x="430" y="106" text-anchor="middle" font-size="8" font-weight="700" fill="#3f7d5c">+ 属性：乾燥肌</text>
+
+      <rect x="600" y="40" width="100" height="80" rx="3" fill="#e9f3ed" stroke="#3f7d5c" stroke-width="2"/>
+      <text x="650" y="58" text-anchor="middle" font-size="9" font-weight="700">レビューB</text>
+      <text x="650" y="74" text-anchor="middle" font-size="8" fill="#4a4a4a">2025年投稿</text>
+      <text x="650" y="90" text-anchor="middle" font-size="8" fill="#4a4a4a">「混合肌に...」</text>
+      <text x="650" y="106" text-anchor="middle" font-size="8" font-weight="700" fill="#3f7d5c">+ 属性：混合肌</text>
+
+      <rect x="480" y="135" width="120" height="60" rx="3" fill="#fafaf7" stroke="#1a1a1a"/>
+      <text x="540" y="155" text-anchor="middle" font-size="9" font-weight="700">プロフィール</text>
+      <text x="540" y="172" text-anchor="middle" font-size="9" fill="#1a1a1a">現在：混合肌</text>
+      <text x="540" y="186" text-anchor="middle" font-size="8" fill="#4a4a4a">（参照されない）</text>
+
+      <rect x="380" y="220" width="320" height="100" rx="3" fill="#fff" stroke="#3f7d5c" stroke-dasharray="4,2"/>
+      <text x="540" y="240" text-anchor="middle" font-size="9" font-weight="700" fill="#3f7d5c">利点</text>
+      <text x="390" y="262" font-size="8.5" fill="#1a1a1a">投稿時の属性が永遠に保持される</text>
+      <text x="390" y="278" font-size="8.5" fill="#3f7d5c" font-weight="700">本文と属性表示が常に一致</text>
+      <text x="390" y="294" font-size="8.5" fill="#1a1a1a">プロフィール変更しても</text>
+      <text x="390" y="310" font-size="8.5" fill="#1a1a1a">過去レビューには影響なし</text>
+
+      <defs>
+        <marker id="arrowDown" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#c8553d"/>
+        </marker>
+      </defs>
+    </svg>
+    <div class="diagram-caption">図 2-6：方式比較（左：採用しない参照方式 ／ 右：採用するスナップショット方式）</div>
+  </div>
+
+  <h2>スナップショット方式の動作</h2>
+
+  <p>レビュー投稿のたびに、その時点のユーザー属性を<strong>レビュー側にコピーして保存</strong>します。具体的には以下のフィールドをコピーします。</p>
+
+  <table>
+    <thead>
+      <tr><th>コピーされる属性</th><th>備考</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>国籍</td><td>常に表示</td></tr>
+      <tr><td>滞在状況</td><td>常に表示</td></tr>
+      <tr><td>育った環境</td><td>場所レビュー時のみ</td></tr>
+      <tr><td>年齢層</td><td>常に表示</td></tr>
+      <tr><td>肌質</td><td>コスメレビュー時のみ</td></tr>
+      <tr><td>肌トーン</td><td>コスメレビュー時のみ</td></tr>
+      <tr><td>パーソナルカラー</td><td>コスメレビュー時のみ</td></tr>
+    </tbody>
+  </table>
+
+  <h2>方式採用の3つの理由</h2>
+
+  <h3 class="numbered" data-num="1">レビューの整合性</h3>
+  <p>レビュー本文と表示属性が常に一致します。「乾燥肌で困っていました」と書かれているレビューに「混合肌」という属性が表示される矛盾を防ぎます。</p>
+
+  <h3 class="numbered" data-num="2">過去レビューの説得力維持</h3>
+  <p>「20代前半でこの商品を使った時の感想」というレビューが、ユーザーが30代になっても<strong>「20代前半」と表示</strong>されます。レビューの当時のリアルさが保たれます。</p>
+
+  <h3 class="numbered" data-num="3">プライバシーへの配慮</h3>
+  <p>ユーザーが過去の属性を変更したいと思っても、過去のレビューを<strong>編集または削除</strong>するという明示的な操作で対応できます。意図しない情報変更を防ぎます。</p>
+
+  <h2>確認画面での表示</h2>
+
+  <p>レビュー投稿フォームの最終確認ステップ（ステップ5）で、<strong>「投稿時の属性として保存される項目」</strong>を必ず表示します。これにより、ユーザーは何が記録されるかを事前に確認できます。</p>
+</section>
+
+<!-- ============== PART 3 HEADER ============== -->
+<div class="part-header">
+  <div class="part-num">PART  3</div>
+  <h1>画面遷移設計</h1>
+  <div class="part-desc">
+    ナビナビ上でユーザーがどのように画面を移動し、目的を達成するかを設計します。主要な3つの導線（閲覧、投稿、承認）を中心に、ユーザー体験全体の流れを定義します。
+  </div>
+  <div class="part-contents">
+    <div class="part-content-item"><strong>3-1</strong>レビュー閲覧導線</div>
+    <div class="part-content-item"><strong>3-2</strong>レビュー投稿導線</div>
+    <div class="part-content-item"><strong>3-3</strong>管理者承認導線</div>
+    <div class="part-content-item"><strong>3-4</strong>権限別アクセス制御</div>
+  </div>
+</div>
+
+<!-- ============== 3-1 BROWSING FLOW ============== -->
+<section class="section" id="s3-1">
+  <h1 class="page-title" data-num="3-1">レビュー閲覧導線<span class="en">Review Browsing Flow</span></h1>
+
+  <p>ユーザーが商品やレビューを発見し、閲覧するまでの導線です。<strong>本サービスでもっとも多く発生する流れ</strong>であり、SEO流入のメインルートでもあります。</p>
+
+  <h2>主要パターン1：トップページ起点</h2>
+
+  <div class="diagram-container">
+    <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" style="font-family: 'Noto Sans JP', sans-serif;">
+      <rect x="20" y="80" width="100" height="50" rx="3" fill="#fff" stroke="#1a1a1a" stroke-width="2"/>
+      <text x="70" y="103" text-anchor="middle" font-size="10" font-weight="700">トップ</text>
+      <text x="70" y="118" text-anchor="middle" font-size="8" fill="#4a4a4a">ページ</text>
+
+      <line x1="120" y1="105" x2="170" y2="105" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#arr1)"/>
+
+      <rect x="170" y="80" width="120" height="50" rx="3" fill="#fff" stroke="#1a1a1a" stroke-width="2"/>
+      <text x="230" y="103" text-anchor="middle" font-size="10" font-weight="700">カテゴリ・</text>
+      <text x="230" y="118" text-anchor="middle" font-size="9">特集ページ</text>
+
+      <line x1="290" y1="105" x2="340" y2="105" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#arr1)"/>
+
+      <rect x="340" y="80" width="120" height="50" rx="3" fill="#fff" stroke="#c8553d" stroke-width="2"/>
+      <text x="400" y="103" text-anchor="middle" font-size="10" font-weight="700">商品詳細</text>
+      <text x="400" y="118" text-anchor="middle" font-size="8" fill="#c8553d">中核ページ</text>
+
+      <line x1="460" y1="105" x2="510" y2="105" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#arr1)"/>
+
+      <rect x="510" y="80" width="120" height="50" rx="3" fill="#fff" stroke="#1a1a1a" stroke-width="2"/>
+      <text x="570" y="103" text-anchor="middle" font-size="10" font-weight="700">レビュー</text>
+      <text x="570" y="118" text-anchor="middle" font-size="9">詳細</text>
+
+      <text x="335" y="170" text-anchor="middle" font-size="9" fill="#4a4a4a" font-style="italic">サイト全体を俯瞰してから商品にたどり着くパターン</text>
+
+      <defs>
+        <marker id="arr1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#1a1a1a"/>
+        </marker>
+      </defs>
+    </svg>
+  </div>
+
+  <h2>主要パターン2：検索エンジン経由</h2>
+
+  <div class="diagram-container">
+    <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" style="font-family: 'Noto Sans JP', sans-serif;">
+      <rect x="20" y="80" width="100" height="50" rx="3" fill="#fafaf7" stroke="#1a1a1a" stroke-width="2"/>
+      <text x="70" y="103" text-anchor="middle" font-size="10" font-weight="700">検索エンジン</text>
+      <text x="70" y="118" text-anchor="middle" font-size="8" fill="#4a4a4a">外部</text>
+
+      <line x1="120" y1="105" x2="180" y2="105" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#arr2)"/>
+
+      <rect x="180" y="80" width="140" height="50" rx="3" fill="#fff" stroke="#c8553d" stroke-width="2"/>
+      <text x="250" y="103" text-anchor="middle" font-size="10" font-weight="700">商品詳細・</text>
+      <text x="250" y="118" text-anchor="middle" font-size="10">レビュー詳細</text>
+
+      <line x1="320" y1="105" x2="380" y2="105" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#arr2)"/>
+
+      <rect x="380" y="80" width="120" height="50" rx="3" fill="#fff" stroke="#1a1a1a" stroke-width="2"/>
+      <text x="440" y="103" text-anchor="middle" font-size="10" font-weight="700">関連商品・</text>
+      <text x="440" y="118" text-anchor="middle" font-size="10">関連レビュー</text>
+
+      <line x1="500" y1="105" x2="560" y2="105" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#arr2)"/>
+
+      <rect x="560" y="80" width="120" height="50" rx="3" fill="#fafaf7" stroke="#3f7d5c" stroke-width="2"/>
+      <text x="620" y="103" text-anchor="middle" font-size="10" font-weight="700">会員登録</text>
+      <text x="620" y="118" text-anchor="middle" font-size="8" fill="#3f7d5c">転換</text>
+
+      <text x="335" y="170" text-anchor="middle" font-size="9" fill="#4a4a4a" font-style="italic">SEO流入の主要パターン。商品詳細ページがランディングとなる</text>
+
+      <defs>
+        <marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#1a1a1a"/>
+        </marker>
+      </defs>
+    </svg>
+  </div>
+
+  <h2>主要パターン3：ブランド起点</h2>
+
+  <div class="diagram-container">
+    <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" style="font-family: 'Noto Sans JP', sans-serif;">
+      <rect x="20" y="80" width="100" height="50" rx="3" fill="#fff" stroke="#1a1a1a" stroke-width="2"/>
+      <text x="70" y="103" text-anchor="middle" font-size="10" font-weight="700">トップ・</text>
+      <text x="70" y="118" text-anchor="middle" font-size="9">ブランド一覧</text>
+
+      <line x1="120" y1="105" x2="170" y2="105" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#arr3)"/>
+
+      <rect x="170" y="80" width="120" height="50" rx="3" fill="#fff" stroke="#1a1a1a" stroke-width="2"/>
+      <text x="230" y="103" text-anchor="middle" font-size="10" font-weight="700">ブランド</text>
+      <text x="230" y="118" text-anchor="middle" font-size="9">詳細</text>
+
+      <line x1="290" y1="105" x2="340" y2="105" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#arr3)"/>
+
+      <rect x="340" y="80" width="120" height="50" rx="3" fill="#fff" stroke="#c8553d" stroke-width="2"/>
+      <text x="400" y="103" text-anchor="middle" font-size="10" font-weight="700">商品詳細</text>
+      <text x="400" y="118" text-anchor="middle" font-size="9">（関連商品から）</text>
+
+      <line x1="460" y1="105" x2="510" y2="105" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#arr3)"/>
+
+      <rect x="510" y="80" width="120" height="50" rx="3" fill="#fff" stroke="#1a1a1a" stroke-width="2"/>
+      <text x="570" y="103" text-anchor="middle" font-size="10" font-weight="700">レビュー</text>
+      <text x="570" y="118" text-anchor="middle" font-size="9">一覧・詳細</text>
+
+      <text x="335" y="170" text-anchor="middle" font-size="9" fill="#4a4a4a" font-style="italic">「韓国コスメのこのブランドが気になる」というユーザー向け</text>
+
+      <defs>
+        <marker id="arr3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#1a1a1a"/>
+        </marker>
+      </defs>
+    </svg>
+  </div>
+
+  <h2>商品詳細ページ内での導線</h2>
+
+  <p>商品詳細ページに到達したユーザーは、以下のアクションを取ることができます。</p>
+
+  <ul>
+    <li><strong>レビューを読む：</strong>同ページ内のレビュー一覧で確認</li>
+    <li><strong>レビューを絞り込む：</strong>PR区分、属性、ソートでフィルター</li>
+    <li><strong>レビューの詳細を見る：</strong>個別レビュー詳細ページへ遷移</li>
+    <li><strong>レビューを書く：</strong>レビュー投稿フォームへ遷移（未ログイン時はログイン画面）</li>
+    <li><strong>関連商品を見る：</strong>同ブランドの他商品、同カテゴリの商品</li>
+    <li><strong>ブランドページを見る：</strong>商品の上位エンティティへ</li>
+    <li><strong>SNSでシェアする：</strong>外部SNSへのシェアリンク</li>
+  </ul>
+</section>
+
+<!-- ============== 3-2 POSTING FLOW ============== -->
+<section class="section" id="s3-2">
+  <h1 class="page-title" data-num="3-2">レビュー投稿導線<span class="en">Review Posting Flow</span></h1>
+
+  <p>レビュー投稿は、<strong>本サービスのコア体験</strong>です。ユーザーがコンテンツを生成する起点であり、UX設計が極めて重要です。</p>
+
+  <h2>レビュー投稿の全体フロー</h2>
+
+  <div class="diagram-container">
+    <svg viewBox="0 0 700 480" xmlns="http://www.w3.org/2000/svg" style="font-family: 'Noto Sans JP', sans-serif;">
+      <!-- Start -->
+      <rect x="280" y="20" width="140" height="40" rx="3" fill="#1a1a1a"/>
+      <text x="350" y="44" text-anchor="middle" fill="#fff" font-size="10" font-weight="700">商品詳細ページ</text>
+
+      <line x1="350" y1="60" x2="350" y2="85" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#arrA)"/>
+
+      <!-- Click button -->
+      <rect x="260" y="85" width="180" height="40" rx="3" fill="#fff" stroke="#1a1a1a" stroke-width="2"/>
+      <text x="350" y="109" text-anchor="middle" font-size="10" font-weight="700">「レビューを書く」をクリック</text>
+
+      <line x1="350" y1="125" x2="350" y2="150" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#arrA)"/>
+
+      <!-- Login check -->
+      <polygon points="350,150 430,200 350,250 270,200" fill="#faf1dc" stroke="#d4a84b" stroke-width="2"/>
+      <text x="350" y="195" text-anchor="middle" font-size="9.5" font-weight="700" fill="#b8902f">ログイン済み？</text>
+      <text x="350" y="212" text-anchor="middle" font-size="8" fill="#b8902f">判定</text>
+
+      <!-- Login path (no) -->
+      <line x1="270" y1="200" x2="170" y2="200" stroke="#c8553d" stroke-width="1.5" marker-end="url(#arrA)"/>
+      <text x="200" y="190" text-anchor="middle" font-size="8.5" fill="#c8553d" font-weight="700">No</text>
+
+      <rect x="60" y="180" width="120" height="40" rx="3" fill="#fae8e3" stroke="#c8553d" stroke-width="2"/>
+      <text x="120" y="204" text-anchor="middle" font-size="10" font-weight="700" fill="#c8553d">ログイン画面</text>
+
+      <line x1="120" y1="220" x2="120" y2="265" stroke="#c8553d" stroke-width="1.5" marker-end="url(#arrA)"/>
+
+      <rect x="60" y="265" width="120" height="40" rx="3" fill="#fae8e3" stroke="#c8553d" stroke-width="2"/>
+      <text x="120" y="289" text-anchor="middle" font-size="10" font-weight="700" fill="#c8553d">会員登録</text>
+
+      <!-- After login back to flow -->
+      <line x1="180" y1="285" x2="350" y2="285" stroke="#3f7d5c" stroke-width="1.5" stroke-dasharray="3,3"/>
+      <line x1="350" y1="285" x2="350" y2="265" stroke="#3f7d5c" stroke-width="1.5" marker-end="url(#arrG)"/>
+      <text x="265" y="278" font-size="8.5" fill="#3f7d5c" font-style="italic">ログイン後</text>
+
+      <!-- Yes path -->
+      <line x1="350" y1="250" x2="350" y2="265" stroke="#3f7d5c" stroke-width="1.5" marker-end="url(#arrG)"/>
+      <text x="370" y="262" font-size="8.5" fill="#3f7d5c" font-weight="700">Yes</text>
+
+      <!-- 5-step form -->
+      <rect x="200" y="265" width="300" height="60" rx="3" fill="#e9f3ed" stroke="#3f7d5c" stroke-width="2"/>
+      <text x="350" y="290" text-anchor="middle" font-size="10" font-weight="700" fill="#3f7d5c">レビュー投稿フォーム</text>
+      <text x="350" y="308" text-anchor="middle" font-size="9" fill="#3f7d5c">5ステップ（次ページ参照）</text>
+
+      <line x1="350" y1="325" x2="350" y2="350" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#arrA)"/>
+
+      <!-- Submit -->
+      <rect x="260" y="350" width="180" height="40" rx="3" fill="#fff" stroke="#1a1a1a" stroke-width="2"/>
+      <text x="350" y="374" text-anchor="middle" font-size="10" font-weight="700">投稿確定（送信）</text>
+
+      <line x1="350" y1="390" x2="350" y2="415" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#arrA)"/>
+
+      <!-- Pending -->
+      <rect x="240" y="415" width="220" height="50" rx="3" fill="#faf1dc" stroke="#d4a84b" stroke-width="2"/>
+      <text x="350" y="436" text-anchor="middle" font-size="10" font-weight="700" fill="#b8902f">承認待ち状態で保存</text>
+      <text x="350" y="453" text-anchor="middle" font-size="8.5" fill="#b8902f">ユーザー・管理者にメール通知</text>
+
+      <defs>
+        <marker id="arrA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#1a1a1a"/>
+        </marker>
+        <marker id="arrG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#3f7d5c"/>
+        </marker>
+      </defs>
+    </svg>
+    <div class="diagram-caption">図 3-2：レビュー投稿の全体フロー</div>
+  </div>
+
+  <h2>レビュー投稿フォーム（5ステップ）</h2>
+
+  <div class="step-flow">
+    <div class="step-item">
+      <span class="step-num">STEP 1</span>
+      <span class="step-name">対象選択</span>
+    </div>
+    <div class="step-item">
+      <span class="step-num">STEP 2</span>
+      <span class="step-name">商品選択</span>
+    </div>
+    <div class="step-item">
+      <span class="step-num">STEP 3</span>
+      <span class="step-name">PR区分</span>
+    </div>
+    <div class="step-item">
+      <span class="step-num">STEP 4</span>
+      <span class="step-name">評価・本文</span>
+    </div>
+    <div class="step-item">
+      <span class="step-num">STEP 5</span>
+      <span class="step-name">確認・送信</span>
+    </div>
+  </div>
+
+  <h3>各ステップの内容</h3>
+
+  <table>
+    <thead>
+      <tr><th>ステップ</th><th>内容</th><th>必須項目</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>STEP 1<br>対象選択</td>
+        <td>レビュー対象が「モノ」（商品）か「コト」（場所）か選択。次にカテゴリを選択。</td>
+        <td>対象タイプ、カテゴリ</td>
+      </tr>
+      <tr>
+        <td>STEP 2<br>商品選択</td>
+        <td>ブランド名・商品名（または店舗名）を入力。サジェストから既存データを選択するか、新規入力。</td>
+        <td>商品/場所の選択</td>
+      </tr>
+      <tr>
+        <td>STEP 3<br>PR区分</td>
+        <td>自費購入／プレゼント／PR から選択。PR選択時は注意喚起テキストが表示。</td>
+        <td>PR区分</td>
+      </tr>
+      <tr>
+        <td>STEP 4<br>評価・本文</td>
+        <td>総合評価、カテゴリ別評価、レビュータイトル、本文、画像（最大5枚）。</td>
+        <td>総合評価、タイトル、本文（50文字以上）</td>
+      </tr>
+      <tr>
+        <td>STEP 5<br>確認・送信</td>
+        <td>入力内容のプレビュー。<strong>投稿時属性として保存される項目</strong>を表示し、ユーザーに確認させる。</td>
+        <td>—</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="box info">
+    <h4>各ステップ間の遷移</h4>
+    <p>各ステップで「次へ」ボタンと「戻る」ボタンを設置します。前のステップに戻っても入力内容は保持されます。途中離脱した場合はデータをセッションに保存し、再ログイン時に「下書き」として復帰可能にします。</p>
+  </div>
+</section>
+
+<!-- ============== 3-3 ADMIN FLOW ============== -->
+<section class="section" id="s3-3">
+  <h1 class="page-title" data-num="3-3">管理者承認導線<span class="en">Admin Approval Flow</span></h1>
+
+  <p>ユーザーが投稿したレビューは、すべて管理者の承認を経てから公開されます。これは、ステマや不適切投稿を防ぐ重要なフローです。</p>
+
+  <h2>管理者の作業フロー</h2>
+
+  <div class="diagram-container">
+    <svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg" style="font-family: 'Noto Sans JP', sans-serif;">
+      <!-- Start -->
+      <rect x="280" y="20" width="140" height="40" rx="3" fill="#1a1a1a"/>
+      <text x="350" y="44" text-anchor="middle" fill="#fff" font-size="10" font-weight="700">管理画面ログイン</text>
+
+      <line x1="350" y1="60" x2="350" y2="85" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#arrAd)"/>
+
+      <!-- Notification -->
+      <rect x="240" y="85" width="220" height="40" rx="3" fill="#fff" stroke="#1a1a1a" stroke-width="2"/>
+      <text x="350" y="103" text-anchor="middle" font-size="10" font-weight="700">承認待ち件数を確認</text>
+      <text x="350" y="117" text-anchor="middle" font-size="8" fill="#4a4a4a">ダッシュボードに件数表示</text>
+
+      <line x1="350" y1="125" x2="350" y2="150" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#arrAd)"/>
+
+      <!-- List view -->
+      <rect x="240" y="150" width="220" height="40" rx="3" fill="#faf1dc" stroke="#d4a84b" stroke-width="2"/>
+      <text x="350" y="174" text-anchor="middle" font-size="10" font-weight="700" fill="#b8902f">承認待ちレビュー一覧</text>
+
+      <line x1="350" y1="190" x2="350" y2="215" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#arrAd)"/>
+
+      <!-- Detail check -->
+      <rect x="240" y="215" width="220" height="40" rx="3" fill="#fff" stroke="#1a1a1a" stroke-width="2"/>
+      <text x="350" y="233" text-anchor="middle" font-size="10" font-weight="700">個別レビューを確認</text>
+      <text x="350" y="247" text-anchor="middle" font-size="8" fill="#4a4a4a">本文、画像、PR区分、属性</text>
+
+      <line x1="350" y1="255" x2="350" y2="280" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#arrAd)"/>
+
+      <!-- 3 actions -->
+      <polygon points="350,280 430,310 350,340 270,310" fill="#fafaf7" stroke="#1a1a1a" stroke-width="2"/>
+      <text x="350" y="313" text-anchor="middle" font-size="9.5" font-weight="700">問題の有無を判断</text>
+
+      <!-- Three branches -->
+      <line x1="270" y1="310" x2="170" y2="310" stroke="#3f7d5c" stroke-width="1.5" marker-end="url(#arrApG)"/>
+      <text x="200" y="300" text-anchor="middle" font-size="8.5" fill="#3f7d5c" font-weight="700">問題なし</text>
+
+      <rect x="40" y="290" width="120" height="40" rx="3" fill="#e9f3ed" stroke="#3f7d5c" stroke-width="2"/>
+      <text x="100" y="314" text-anchor="middle" font-size="10" font-weight="700" fill="#3f7d5c">承認・公開</text>
+
+      <line x1="430" y1="310" x2="530" y2="310" stroke="#d4a84b" stroke-width="1.5" marker-end="url(#arrApY)"/>
+      <text x="490" y="300" text-anchor="middle" font-size="8.5" fill="#b8902f" font-weight="700">修正必要</text>
+
+      <rect x="540" y="290" width="120" height="40" rx="3" fill="#faf1dc" stroke="#d4a84b" stroke-width="2"/>
+      <text x="600" y="314" text-anchor="middle" font-size="10" font-weight="700" fill="#b8902f">差し戻し</text>
+
+      <line x1="350" y1="340" x2="350" y2="358" stroke="#c8553d" stroke-width="1.5" marker-end="url(#arrApR)"/>
+      <text x="370" y="354" font-size="8.5" fill="#c8553d" font-weight="700">違反</text>
+
+      <rect x="280" y="358" width="140" height="20" rx="3" fill="#fae8e3" stroke="#c8553d" stroke-width="2"/>
+      <text x="350" y="372" text-anchor="middle" font-size="9" font-weight="700" fill="#c8553d">非公開</text>
+
+      <defs>
+        <marker id="arrAd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#1a1a1a"/>
+        </marker>
+        <marker id="arrApG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#3f7d5c"/>
+        </marker>
+        <marker id="arrApY" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#d4a84b"/>
+        </marker>
+        <marker id="arrApR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#c8553d"/>
+        </marker>
+      </defs>
+    </svg>
+    <div class="diagram-caption">図 3-3：管理者の承認導線</div>
+  </div>
+
+  <h2>承認時の判断基準</h2>
+
+  <table>
+    <thead>
+      <tr><th>判断</th><th>条件</th><th>処理</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>承認</td>
+        <td>本文・PR区分が適切、ガイドライン違反なし</td>
+        <td>「公開」ステータスへ変更、投稿者にメール通知</td>
+      </tr>
+      <tr>
+        <td>差し戻し</td>
+        <td>軽微な修正で済む（PR区分の誤り、画像の問題等）</td>
+        <td>「差し戻し」ステータスへ、修正コメント付きで投稿者に通知</td>
+      </tr>
+      <tr>
+        <td>非公開</td>
+        <td>明確な違反（誹謗中傷、虚偽内容、宣伝目的等）</td>
+        <td>「非公開」ステータスへ、投稿者に通知</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>一括操作機能</h2>
+
+  <p>件数が多い場合に備え、以下の一括操作を提供します。</p>
+
+  <ul>
+    <li><strong>一括承認：</strong>複数レビューを選択して同時に承認</li>
+    <li><strong>一括差し戻し：</strong>共通の修正コメントを付けて一括差し戻し</li>
+    <li><strong>フィルター：</strong>PR区分、カテゴリ、投稿日時で絞り込み</li>
+    <li><strong>検索：</strong>キーワード、投稿者で検索</li>
+  </ul>
+
+  <h2>承認業務の運用想定</h2>
+
+  <div class="box tip">
+    <h4>承認業務の所要時間目安</h4>
+    <p>1件あたりの承認所要時間目安：</p>
+    <ul>
+      <li>明らかに問題ない案件：30秒〜1分</li>
+      <li>本文を読んで判断する案件：2〜3分</li>
+      <li>画像も確認する案件：3〜5分</li>
+    </ul>
+    <p>初期は1日10〜30件程度、運用が安定すれば1日50〜100件程度の処理を想定します。</p>
+  </div>
+</section>
+
+<!-- ============== 3-4 ACCESS CONTROL ============== -->
+<section class="section" id="s3-4">
+  <h1 class="page-title" data-num="3-4">権限別アクセス制御<span class="en">Access Control Matrix</span></h1>
+
+  <p>各機能・画面に対して、誰がアクセス可能かを定義します。</p>
+
+  <h2>3つの権限レベル</h2>
+
+  <table>
+    <thead>
+      <tr><th>権限</th><th>対象</th><th>主な操作</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>ゲスト</td>
+        <td>未ログインユーザー</td>
+        <td>公開コンテンツの閲覧</td>
+      </tr>
+      <tr>
+        <td>会員</td>
+        <td>ログインしているユーザー</td>
+        <td>レビュー投稿、自分のコンテンツ管理</td>
+      </tr>
+      <tr>
+        <td>管理者</td>
+        <td>navinabi様の運営担当者</td>
+        <td>すべての操作</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>機能別アクセス制御マトリクス</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>機能</th>
+        <th>ゲスト</th>
+        <th>会員</th>
+        <th>管理者</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>トップページ閲覧</td><td>○</td><td>○</td><td>○</td></tr>
+      <tr><td>記事閲覧</td><td>○</td><td>○</td><td>○</td></tr>
+      <tr><td>レビュー閲覧（公開済み）</td><td>○</td><td>○</td><td>○</td></tr>
+      <tr><td>商品・ブランド・場所閲覧</td><td>○</td><td>○</td><td>○</td></tr>
+      <tr><td>検索機能</td><td>○</td><td>○</td><td>○</td></tr>
+      <tr><td>会員登録</td><td>○</td><td>—</td><td>—</td></tr>
+      <tr><td>ログイン</td><td>○</td><td>—</td><td>—</td></tr>
+      <tr><td>レビュー投稿</td><td>×</td><td>○</td><td>○</td></tr>
+      <tr><td>自分のレビュー編集・削除</td><td>×</td><td>○</td><td>○</td></tr>
+      <tr><td>他人のレビュー編集・削除</td><td>×</td><td>×</td><td>○</td></tr>
+      <tr><td>プロフィール編集</td><td>×</td><td>○（自分のみ）</td><td>○（全員）</td></tr>
+      <tr><td>マイページ閲覧</td><td>×</td><td>○</td><td>○</td></tr>
+      <tr><td>承認待ちレビュー閲覧</td><td>×</td><td>○（自分のみ）</td><td>○</td></tr>
+      <tr><td>レビュー承認・差し戻し</td><td>×</td><td>×</td><td>○</td></tr>
+      <tr><td>ユーザー管理</td><td>×</td><td>×</td><td>○</td></tr>
+      <tr><td>ブランド・商品マスタ管理</td><td>×</td><td>×</td><td>○</td></tr>
+      <tr><td>仮登録商品の承認・統合</td><td>×</td><td>×</td><td>○</td></tr>
+      <tr><td>記事投稿</td><td>×</td><td>×</td><td>○</td></tr>
+    </tbody>
+  </table>
+
+  <h2>未ログインユーザーへの誘導</h2>
+
+  <p>ゲストユーザーがログインが必要な操作を試みた場合の挙動：</p>
+
+  <ul>
+    <li><strong>レビュー投稿：</strong>「ログインまたは会員登録」案内ページへ誘導。ログイン後、元の画面（投稿フォーム）に自動遷移</li>
+    <li><strong>マイページアクセス：</strong>ログイン画面へリダイレクト</li>
+    <li><strong>その他制限機能：</strong>ログイン要求のメッセージとログインボタン表示</li>
+  </ul>
+</section>
+
+<!-- ============== PART 4 HEADER ============== -->
+<div class="part-header">
+  <div class="part-num">PART  4</div>
+  <h1>機能仕様</h1>
+  <div class="part-desc">
+    各機能の詳細仕様を定義します。レビュー投稿、承認、検索、サジェスト、自動翻訳、ステマ対策、通知など、本サービスを支える主要機能の動作を網羅します。
+  </div>
+  <div class="part-contents">
+    <div class="part-content-item"><strong>4-1</strong>レビュー投稿フォーム仕様</div>
+    <div class="part-content-item"><strong>4-2</strong>レビュー承認ワークフロー</div>
+    <div class="part-content-item"><strong>4-3</strong>検索・フィルター・ランキング</div>
+    <div class="part-content-item"><strong>4-4</strong>サジェスト機能と仮登録フロー</div>
+    <div class="part-content-item"><strong>4-5</strong>レビュー自動翻訳ワークフロー</div>
+    <div class="part-content-item"><strong>4-6</strong>多言語対応の方針</div>
+    <div class="part-content-item"><strong>4-7</strong>ステマ対策の実装方針</div>
+    <div class="part-content-item"><strong>4-8</strong>通知・メール送信仕様</div>
+  </div>
+</div>
+
+<!-- ============== 4-1 REVIEW FORM ============== -->
+<section class="section" id="s4-1">
+  <h1 class="page-title" data-num="4-1">レビュー投稿フォーム仕様<span class="en">Review Form Specification</span></h1>
+
+  <h2>STEP 1：対象選択</h2>
+
+  <h3>画面要素</h3>
+  <ul>
+    <li><strong>対象タイプ選択：</strong>「モノ」（商品）か「コト」（店舗・場所）の2択</li>
+    <li><strong>カテゴリ選択：</strong>選んだタイプに応じてカテゴリ表示</li>
+  </ul>
+
+  <h3>カテゴリ一覧（モノ）</h3>
+  <ul>
+    <li>コスメ（ファンデーション、リップ、アイシャドウ、スキンケア、ヘアケア、ネイル）</li>
+    <li>食品・飲料</li>
+    <li>生活用品</li>
+    <li>家電・ガジェット</li>
+    <li>ファッション</li>
+    <li>その他</li>
+  </ul>
+
+  <h3>カテゴリ一覧（コト）</h3>
+  <ul>
+    <li>飲食店</li>
+    <li>観光地</li>
+    <li>サウナ・スパ</li>
+    <li>サロン</li>
+    <li>ホテル・宿泊</li>
+    <li>その他</li>
+  </ul>
+
+  <h2>STEP 2：商品・場所の選択</h2>
+
+  <h3>サジェスト検索</h3>
+  <ul>
+    <li>ブランド名または商品名（場所名）を入力</li>
+    <li>2文字以上で候補表示開始</li>
+    <li>既存データから最大10件表示（画像付き）</li>
+    <li>選択するとSTEP 3へ</li>
+  </ul>
+
+  <h3>新規入力（該当なしの場合）</h3>
+  <ul>
+    <li>「該当する商品がない」「該当する場所がない」ボタン</li>
+    <li>新規入力フォーム展開：ブランド名／商品名（場所名）／説明／画像（任意）</li>
+    <li>送信時、商品・場所は<strong>「仮登録」状態</strong>で保存</li>
+    <li>レビューは仮登録商品とリレーションを持つ</li>
+  </ul>
+
+  <h2>STEP 3：PR区分</h2>
+
+  <h3>3つの選択肢</h3>
+  <ul>
+    <li><span class="pr-badge pr-self">自費購入</span> 自分のお金で購入した商品・サービス</li>
+    <li><span class="pr-badge pr-gift">プレゼント</span> 家族・友人からの贈り物（金銭授受なし）</li>
+    <li><span class="pr-badge pr-pr">PR</span> 商品提供・モニター参加・招待・対価を受けた</li>
+  </ul>
+
+  <h3>PR選択時の注意喚起</h3>
+  <div class="box warn">
+    <h4>注意喚起テキスト（PR選択時表示）</h4>
+    <p>「PRレビューは、企業から商品提供・モニター参加・招待などを受けた商品・サービスへのレビューです。金銭の授受の有無に関わらず、何らかの便宜を受けている場合は『PR』を選択してください。虚偽申告は規約違反となります。」</p>
+  </div>
+
+  <h2>STEP 4：評価・本文</h2>
+
+  <h3>必須項目</h3>
+  <ul>
+    <li>総合評価（★0.5〜5.0、0.5刻み）</li>
+    <li>レビュータイトル（最大100文字）</li>
+    <li>レビュー本文（最低50文字、最大3000文字）</li>
+  </ul>
+
+  <h3>カテゴリ別評価（カテゴリにより表示）</h3>
+  <ul>
+    <li>コスメ・ファンデ：崩れにくさ、化粧ノリ、発色、肌への負担</li>
+    <li>コスメ・リップ：発色、持続力、保湿力、使いやすさ</li>
+    <li>飲食店：味、サービス、コスパ、雰囲気</li>
+    <li>観光地・サウナ：立地、清潔さ、満足度、コスパ</li>
+  </ul>
+
+  <h3>その他の任意項目</h3>
+  <ul>
+    <li>バリエーション（カラー、サイズ等）</li>
+    <li>購入・利用時期</li>
+    <li>添付画像（最大5枚、各5MB以下）</li>
+  </ul>
+
+  <h2>STEP 5：確認・送信</h2>
+
+  <h3>確認項目</h3>
+  <ul>
+    <li>STEP 1〜4で入力した全内容のプレビュー</li>
+    <li>「投稿時の属性として保存される項目」の表示（重要）</li>
+    <li>「規約に同意する」チェックボックス</li>
+  </ul>
+
+  <h3>投稿時の挙動</h3>
+  <ul>
+    <li>レビューが「承認待ち」状態で保存</li>
+    <li>ユーザーに「投稿完了・承認待ち」画面表示</li>
+    <li>ユーザーにメール通知（「ご投稿ありがとうございます」）</li>
+    <li>管理者にメール通知（「新規レビューが投稿されました」）</li>
+  </ul>
+</section>
+
+<!-- ============== 4-2 APPROVAL ============== -->
+<section class="section" id="s4-2">
+  <h1 class="page-title" data-num="4-2">レビュー承認ワークフロー<span class="en">Review Approval Workflow</span></h1>
+
+  <h2>承認画面の機能</h2>
+
+  <h3>一覧画面</h3>
+  <table>
+    <thead>
+      <tr><th>カラム</th><th>内容</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>投稿日時</td><td>新しい順にソートデフォルト</td></tr>
+      <tr><td>投稿者</td><td>ニックネーム</td></tr>
+      <tr><td>対象</td><td>商品名／場所名</td></tr>
+      <tr><td>PR区分</td><td>バッジ表示</td></tr>
+      <tr><td>評価</td><td>星評価</td></tr>
+      <tr><td>本文プレビュー</td><td>最初の50文字</td></tr>
+      <tr><td>画像</td><td>サムネイル表示（あれば）</td></tr>
+      <tr><td>操作</td><td>承認 / 差し戻し / 詳細 / 非公開</td></tr>
+    </tbody>
+  </table>
+
+  <h3>個別承認画面</h3>
+  <ul>
+    <li>レビュー全文プレビュー（実際のサイトでの表示と同じ）</li>
+    <li>投稿者プロフィール表示（クリックでユーザー詳細へ）</li>
+    <li>PR区分の修正機能（誤申告の修正用）</li>
+    <li>カテゴリ・対象の修正機能</li>
+    <li>承認 / 差し戻し / 非公開の3ボタン</li>
+    <li>差し戻し時：投稿者へのコメント入力欄</li>
+  </ul>
+
+  <h2>差し戻し時のフロー</h2>
+
+  <ol>
+    <li>管理者が「差し戻し」をクリック</li>
+    <li>修正コメントを入力（例：「PR区分が違う可能性があります。商品提供を受けていれば『PR』を選択してください」）</li>
+    <li>レビューが「差し戻し」ステータスに変更</li>
+    <li>投稿者にメール通知（修正コメント付き）</li>
+    <li>投稿者はマイページで該当レビューを編集して再申請</li>
+    <li>再申請されたレビューは再び「承認待ち」状態に</li>
+  </ol>
+
+  <h2>非公開時のフロー</h2>
+
+  <ol>
+    <li>管理者が「非公開」をクリック</li>
+    <li>非公開理由を入力（例：「規約違反：他者を誹謗中傷する内容」）</li>
+    <li>レビューが「非公開」ステータスに変更</li>
+    <li>投稿者にメール通知（理由付き）</li>
+    <li>投稿者はマイページから該当レビューを閲覧可能だが、編集・再申請不可</li>
+  </ol>
+
+  <h2>運用上の補助機能</h2>
+
+  <ul>
+    <li><strong>定型コメント：</strong>差し戻し時のよくある理由をプリセット保存</li>
+    <li><strong>承認履歴：</strong>各レビューの承認履歴（誰がいつ承認/差し戻し/非公開にしたか）</li>
+    <li><strong>担当割り当て：</strong>複数管理者がいる場合、特定レビューの担当者を指定可能</li>
+  </ul>
+</section>
+
+<!-- ============== 4-3 SEARCH ============== -->
+<section class="section" id="s4-3">
+  <h1 class="page-title" data-num="4-3">検索・フィルター・ランキング<span class="en">Search, Filter, Ranking</span></h1>
+
+  <h2>検索機能</h2>
+
+  <h3>検索対象</h3>
+  <ul>
+    <li>商品名・ブランド名・場所名</li>
+    <li>レビュー本文・タイトル</li>
+    <li>記事（情報コンテンツ）タイトル・本文</li>
+  </ul>
+
+  <h3>検索結果ページ</h3>
+  <p>カテゴリ別タブで結果を分類表示します。</p>
+  <ul>
+    <li>すべて（混在表示）</li>
+    <li>商品（タブ）</li>
+    <li>ブランド（タブ）</li>
+    <li>場所（タブ）</li>
+    <li>レビュー（タブ）</li>
+    <li>記事（タブ）</li>
+  </ul>
+
+  <h2>フィルター機能（レビュー一覧）</h2>
+
+  <table>
+    <thead>
+      <tr><th>フィルター</th><th>選択肢</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>PR区分</td>
+        <td>すべて／自費購入のみ／プレゼント／PR</td>
+      </tr>
+      <tr>
+        <td>評価</td>
+        <td>★3以上／★4以上／★4.5以上</td>
+      </tr>
+      <tr>
+        <td>国籍</td>
+        <td>日本／韓国／日本+韓国（ハーフ）／その他</td>
+      </tr>
+      <tr>
+        <td>滞在状況</td>
+        <td>日本在住／韓国在住／日韓を行き来／海外在住</td>
+      </tr>
+      <tr>
+        <td>年齢層</td>
+        <td>10代／20代前半／20代後半／30代／40代以上</td>
+      </tr>
+      <tr>
+        <td>肌質（コスメ時）</td>
+        <td>乾燥肌／脂性肌／混合肌／普通肌／敏感肌</td>
+      </tr>
+      <tr>
+        <td>肌トーン（コスメ時）</td>
+        <td>イエベ春／イエベ秋／ブルベ夏／ブルベ冬</td>
+      </tr>
+      <tr>
+        <td>カテゴリ</td>
+        <td>カテゴリツリー</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>「自費購入のみ」フィルターの強調表示</h3>
+
+  <div class="box info">
+    <h4>差別化を実現するUI設計</h4>
+    <p>「自費購入のみ」フィルターは、本サービスのステマ対策の核となる機能です。フィルターバー上で<strong>独立した目立つボタン</strong>として配置し、ワンクリックで信頼度の高いレビューだけに絞り込めるようにします。</p>
+  </div>
+
+  <h2>ソート機能</h2>
+
+  <ul>
+    <li>新着順（デフォルト）</li>
+    <li>評価が高い順</li>
+    <li>評価が低い順</li>
+    <li>参考になった順（将来拡張用、ローンチ時は実装しない）</li>
+  </ul>
+
+  <h2>ランキング機能</h2>
+
+  <h3>ランキング表示箇所</h3>
+  <ul>
+    <li>トップページ（カテゴリ別ランキング上位5件）</li>
+    <li>カテゴリ一覧ページ（そのカテゴリの上位10件）</li>
+    <li>ブランドページ（そのブランドの上位5件）</li>
+  </ul>
+
+  <h3>ランキング集計の仕組み</h3>
+  <p>1時間ごとのcron処理で、各商品・場所の<strong>平均評価</strong>と<strong>レビュー数</strong>を集計します。ランキングスコアは以下の式で算出。</p>
+
+  <div class="box">
+    <p><strong>ランキングスコア = (評価の合計) ÷ (レビュー数 + 5)</strong></p>
+    <p>「+5」を加えることで、レビュー数が極端に少ない商品が高評価になりすぎることを防ぎます（ベイズ平均的な発想）。</p>
+  </div>
+
+  <h3>ランキング除外条件</h3>
+  <ul>
+    <li>レビュー数が3件未満の商品</li>
+    <li>仮登録ステータスの商品</li>
+    <li>非公開ステータスの商品</li>
+  </ul>
+</section>
+
+<!-- ============== 4-4 SUGGEST ============== -->
+<section class="section" id="s4-4">
+  <h1 class="page-title" data-num="4-4">サジェスト機能と仮登録フロー<span class="en">Suggest & Provisional Registration</span></h1>
+
+  <h2>サジェスト機能</h2>
+
+  <p>レビュー投稿フォームのSTEP 2で、ブランド名・商品名（場所名）を入力する際、既存データから候補をオートコンプリート表示します。</p>
+
+  <h3>サジェストの動作</h3>
+  <ul>
+    <li>2文字以上の入力で候補表示開始</li>
+    <li>入力に対して曖昧マッチで検索</li>
+    <li>最大10件まで表示（画像とブランド名付き）</li>
+    <li>新着登録の商品が上位に表示</li>
+    <li>選択時、その商品IDがフォームに保存</li>
+  </ul>
+
+  <h3>該当なしの場合</h3>
+  <ul>
+    <li>候補リストの最下部に「該当する商品がない」リンク表示</li>
+    <li>クリックで新規入力フォーム展開</li>
+  </ul>
+
+  <h2>仮登録フロー</h2>
+
+  <p>ユーザーが新規入力した商品・場所は、<strong>「仮登録」</strong>状態で保存されます。これは管理者が後で確認し、正式登録するかどうかを判断する仕組みです。</p>
+
+  <h3>仮登録時のユーザー入力項目</h3>
+  <ul>
+    <li>商品名（場所名）：必須</li>
+    <li>ブランド名：必須（既存ブランドからサジェスト、または新規入力）</li>
+    <li>カテゴリ：必須</li>
+    <li>説明：任意</li>
+    <li>画像：任意（公式画像があれば）</li>
+  </ul>
+
+  <h3>管理者の処理フロー</h3>
+
+  <ol>
+    <li>管理画面の「仮登録商品」一覧を確認</li>
+    <li>個別商品をクリックして詳細を確認</li>
+    <li>3つの判断：<br>
+      <strong>(A) 正式登録：</strong>新しい商品として正式マスタに登録<br>
+      <strong>(B) 既存商品に統合：</strong>同じ商品が既に存在する場合、既存商品に統合（仮登録した商品にひもづくレビューも既存商品に移管）<br>
+      <strong>(C) 却下：</strong>不適切な登録は削除（投稿レビューも非公開に）</li>
+    <li>処理後、ユーザーへの自動通知（任意）</li>
+  </ol>
+
+  <h2>統合処理の仕組み</h2>
+
+  <p>「同じ商品が既に存在する」と判断した場合の統合処理：</p>
+
+  <ol>
+    <li>仮登録商品にリンクされているレビューを抽出</li>
+    <li>レビューの「対象ID」を既存商品のIDに書き換え</li>
+    <li>仮登録商品を削除</li>
+    <li>既存商品の評価集計を再計算</li>
+  </ol>
+
+  <div class="box danger">
+    <h4>統合時の注意点</h4>
+    <p>統合処理は<strong>「やり直し」が困難</strong>です。誤って統合した場合、元の状態に戻すには手動でレビューの対象IDを書き換える必要があります。管理画面では統合実行前に確認ダイアログを表示します。</p>
+  </div>
+</section>
+
+<!-- ============== 4-5 TRANSLATION ============== -->
+<section class="section" id="s4-5">
+  <h1 class="page-title" data-num="4-5">レビュー自動翻訳ワークフロー<span class="en">Auto-Translation Workflow</span></h1>
+
+  <h2>翻訳の対象</h2>
+
+  <p>本サービスでは、<strong>レビュー本文</strong>のみを自動翻訳の対象とします。記事（情報コンテンツ）はクライアント様による手動投稿（日本語版・韓国語版を別々に作成）です。</p>
+
+  <h2>翻訳のフロー</h2>
+
+  <div class="diagram-container">
+    <svg viewBox="0 0 700 280" xmlns="http://www.w3.org/2000/svg" style="font-family: 'Noto Sans JP', sans-serif;">
+      <rect x="20" y="40" width="120" height="50" rx="3" fill="#fff" stroke="#1a1a1a" stroke-width="2"/>
+      <text x="80" y="62" text-anchor="middle" font-size="10" font-weight="700">レビュー投稿</text>
+      <text x="80" y="78" text-anchor="middle" font-size="8" fill="#4a4a4a">日本語または韓国語</text>
+
+      <line x1="140" y1="65" x2="195" y2="65" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#arrT)"/>
+
+      <rect x="195" y="40" width="120" height="50" rx="3" fill="#e4eef5" stroke="#4a7d9d" stroke-width="2"/>
+      <text x="255" y="62" text-anchor="middle" font-size="10" font-weight="700" fill="#4a7d9d">DeepL API</text>
+      <text x="255" y="78" text-anchor="middle" font-size="8" fill="#4a7d9d">自動翻訳実行</text>
+
+      <line x1="315" y1="65" x2="370" y2="65" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#arrT)"/>
+
+      <rect x="370" y="40" width="120" height="50" rx="3" fill="#faf1dc" stroke="#d4a84b" stroke-width="2"/>
+      <text x="430" y="62" text-anchor="middle" font-size="10" font-weight="700" fill="#b8902f">承認待ち</text>
+      <text x="430" y="78" text-anchor="middle" font-size="8" fill="#b8902f">原文＋翻訳文</text>
+
+      <line x1="490" y1="65" x2="545" y2="65" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#arrT)"/>
+
+      <rect x="545" y="40" width="130" height="50" rx="3" fill="#fff" stroke="#1a1a1a" stroke-width="2"/>
+      <text x="610" y="62" text-anchor="middle" font-size="10" font-weight="700">管理者確認</text>
+      <text x="610" y="78" text-anchor="middle" font-size="8" fill="#4a4a4a">必要に応じ修正</text>
+
+      <line x1="610" y1="90" x2="610" y2="135" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#arrT)"/>
+
+      <rect x="540" y="135" width="140" height="50" rx="3" fill="#e9f3ed" stroke="#3f7d5c" stroke-width="2"/>
+      <text x="610" y="157" text-anchor="middle" font-size="10" font-weight="700" fill="#3f7d5c">承認・公開</text>
+      <text x="610" y="173" text-anchor="middle" font-size="8" fill="#3f7d5c">原文＋翻訳文公開</text>
+
+      <line x1="540" y1="160" x2="350" y2="160" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#arrT)"/>
+
+      <rect x="200" y="135" width="150" height="50" rx="3" fill="#fff" stroke="#1a1a1a" stroke-width="2"/>
+      <text x="275" y="157" text-anchor="middle" font-size="10" font-weight="700">サイト上で表示</text>
+      <text x="275" y="173" text-anchor="middle" font-size="8" fill="#4a4a4a">言語切替で表示制御</text>
+
+      <text x="350" y="240" text-anchor="middle" font-size="9" fill="#4a4a4a" font-style="italic">自動翻訳→管理者修正→承認→公開の二段階品質管理</text>
+
+      <defs>
+        <marker id="arrT" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#1a1a1a"/>
+        </marker>
+      </defs>
+    </svg>
+    <div class="diagram-caption">図 4-5：自動翻訳ワークフロー</div>
+  </div>
+
+  <h2>DeepL APIの選定理由</h2>
+
+  <ul>
+    <li>機械翻訳の精度が業界トップレベル</li>
+    <li>日韓間の翻訳に特に強い</li>
+    <li>無料プランでも月50万文字まで利用可能（初期段階で十分）</li>
+    <li>APIが安定している</li>
+  </ul>
+
+  <h2>翻訳精度を補完する仕組み</h2>
+
+  <h3>管理者修正機能</h3>
+  <p>承認画面で、原文と翻訳文を並べて表示します。管理者は翻訳文を読み、不自然な部分があれば手動修正できます。修正後の翻訳文が公開されます。</p>
+
+  <h3>表示時の言語切替</h3>
+  <ul>
+    <li>サイト全体の言語が日本語のとき：原文（日本語投稿の場合）または翻訳文（韓国語投稿の場合）を表示</li>
+    <li>サイト全体の言語が韓国語のとき：原文（韓国語投稿の場合）または翻訳文（日本語投稿の場合）を表示</li>
+    <li>レビュー詳細では「原文を表示」リンクで両方確認可能</li>
+  </ul>
+
+  <h2>API利用量の管理</h2>
+
+  <div class="box warn">
+    <h4>無料プラン50万文字／月の運用</h4>
+    <p>1レビュー平均500文字とすると、月1000件のレビューで50万文字に達します。無料プランで運用を始め、レビュー数が増加した段階で有料プラン（月630ユーロ〜）への移行を検討します。</p>
+    <p>API利用量は管理画面のダッシュボードで可視化し、上限の80%に達した時点で管理者にアラート通知します。</p>
+  </div>
+</section>
+
+<!-- ============== 4-6 MULTILINGUAL ============== -->
+<section class="section" id="s4-6">
+  <h1 class="page-title" data-num="4-6">多言語対応の方針<span class="en">Multilingual Strategy</span></h1>
+
+  <h2>3つの言語領域</h2>
+
+  <p>ナビナビでは、コンテンツの種類によって異なる多言語対応方針を採用します。</p>
+
+  <table>
+    <thead>
+      <tr><th>コンテンツ</th><th>方針</th><th>運用</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>記事（情報コンテンツ）</td>
+        <td>日本語版・韓国語版を別々に投稿</td>
+        <td>クライアント側で手動投稿</td>
+      </tr>
+      <tr>
+        <td>レビュー</td>
+        <td>原文を保存、もう一方の言語はDeepL自動翻訳</td>
+        <td>ユーザーは1言語で投稿</td>
+      </tr>
+      <tr>
+        <td>商品名・ブランド名・場所名</td>
+        <td>日本語名と韓国語名を両方データ保持</td>
+        <td>管理者が手動入力</td>
+      </tr>
+      <tr>
+        <td>UI（ボタン、メニュー等）</td>
+        <td>翻訳ファイルで管理</td>
+        <td>初期にすべて翻訳</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>言語切替の挙動</h2>
+
+  <h3>言語切替の仕組み</h3>
+  <ul>
+    <li>サイト上部に言語切替メニュー（日本語 / 한국어）配置</li>
+    <li>クリックで該当言語版URLにリダイレクト</li>
+    <li>選択した言語をクッキーに保存（次回訪問時に自動反映）</li>
+    <li>ブラウザの言語設定を初回訪問時に判定（推奨言語自動選択）</li>
+  </ul>
+
+  <h3>言語別URL構造</h3>
+
+  <table>
+    <thead>
+      <tr><th>ページ</th><th>日本語版URL</th><th>韓国語版URL</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>トップ</td>
+        <td>example.com/</td>
+        <td>example.com/ko/</td>
+      </tr>
+      <tr>
+        <td>商品詳細</td>
+        <td>example.com/products/abc/</td>
+        <td>example.com/ko/products/abc/</td>
+      </tr>
+      <tr>
+        <td>レビュー詳細</td>
+        <td>example.com/reviews/123/</td>
+        <td>example.com/ko/reviews/123/</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>SEOへの配慮</h2>
+
+  <ul>
+    <li>各ページにhreflangタグを設定（日本語ページと韓国語ページの相互リンク）</li>
+    <li>各言語版に独立したサイトマップを生成</li>
+    <li>Search Consoleで両言語版を別プロパティとして登録</li>
+  </ul>
+
+  <div class="box info">
+    <h4>記事の翻訳について</h4>
+    <p>情報コンテンツ（記事）は、自動翻訳ではなく<strong>クライアント様による手動翻訳投稿</strong>を採用しています。理由は、記事は文章の質が重要であり、自動翻訳では読者に違和感を与える可能性が高いためです。</p>
+    <p>運用負荷は増えますが、SEO上もコンテンツの質が高い方が有利です。</p>
+  </div>
+</section>
+
+<!-- ============== 4-7 ANTI-STEALTH ============== -->
+<section class="section" id="s4-7">
+  <h1 class="page-title" data-num="4-7">ステマ対策の実装方針<span class="en">Anti-Stealth Marketing</span></h1>
+
+  <h2>本サービスの差別化軸</h2>
+
+  <p>2023年10月施行の景品表示法改正により、ステマ規制が法的に強化されました。本サービスは、この規制に積極的に対応する透明性の高いレビュープラットフォームを目指します。</p>
+
+  <h2>5つの実装施策</h2>
+
+  <h3 class="numbered" data-num="1">PR区分の必須選択</h3>
+  <p>レビュー投稿時、PR区分（自費購入／プレゼント／PR）の選択を必須にします。スキップ不可です。</p>
+
+  <h3 class="numbered" data-num="2">PR区分のUI上での明示</h3>
+  <p>レビューカード、レビュー詳細、検索結果すべてにおいて、PR区分を視覚的に強調表示します。特にPRレビューは赤塗りバッジで目立つように表示します。</p>
+
+  <h3 class="numbered" data-num="3">「自費購入のみ」ワンクリックフィルター</h3>
+  <p>レビュー一覧、商品詳細、ブランド詳細などすべてのレビュー表示箇所に、「自費購入のみ」フィルターを独立ボタンとして配置します。ユーザーは1クリックで信頼度の高いレビューだけを閲覧できます。</p>
+
+  <h3 class="numbered" data-num="4">PR選択時の注意喚起</h3>
+  <p>投稿フォームでPRを選択した際、「金銭の授受の有無に関わらず、商品提供・モニター参加・招待などを受けている場合はPRとして扱います」という注意喚起を表示します。</p>
+
+  <h3 class="numbered" data-num="5">虚偽申告への対応</h3>
+  <p>管理者が承認時に「PR区分が誤っている可能性がある」と判断した場合、PR区分を修正する権限を持ちます。同時にユーザーに修正理由を通知します。</p>
+
+  <h2>外部のステマ違反通報フォーム</h2>
+
+  <h3>初期実装方針</h3>
+  <p>初期ローンチ段階では、ナビナビサイト内ではなく、<strong>外部のGoogleフォームへのリンク</strong>として通報フォームを設置します。本格的なサイト内通報機能は将来拡張として位置付けます。</p>
+
+  <ul>
+    <li>フッターまたはレビュー詳細ページに「ステマ違反を通報する」リンクを設置</li>
+    <li>クリック時に外部Googleフォームに遷移</li>
+    <li>フォーム送信内容はクライアント様のメールアドレスに送信</li>
+    <li>クライアント様が手動で確認・対応</li>
+  </ul>
+
+  <h3>将来拡張時の機能</h3>
+  <p>運用が本格化した段階で、以下の機能を追加実装可能です。</p>
+  <ul>
+    <li>サイト内通報フォーム（ログイン不要）</li>
+    <li>レビューごとの「申告する」ボタン</li>
+    <li>管理画面での通報内容管理</li>
+    <li>通報多数のレビューの自動非表示機能</li>
+  </ul>
+
+  <div class="box info">
+    <h4>段階的アプローチの理由</h4>
+    <p>初期段階では通報件数が少ないと予想されるため、まず外部フォームでスタートし、運用実績を見ながら本格機能を実装することで、開発工数を最適化できます。</p>
+  </div>
+
+  <h2>ステマ対策の継続的な改善</h2>
+
+  <p>ローンチ後も、以下の指標を継続的にモニタリングします。</p>
+  <ul>
+    <li>PR区分別のレビュー投稿件数比率</li>
+    <li>「自費購入のみ」フィルター利用率</li>
+    <li>ステマ通報件数</li>
+    <li>差し戻し時のPR区分修正件数</li>
+  </ul>
+</section>
+
+<!-- ============== 4-8 NOTIFICATION ============== -->
+<section class="section" id="s4-8">
+  <h1 class="page-title" data-num="4-8">通知・メール送信仕様<span class="en">Notification Specification</span></h1>
+
+  <h2>通知の種類</h2>
+
+  <p>ナビナビでは、以下のタイミングで自動メール通知を送信します。</p>
+
+  <table>
+    <thead>
+      <tr><th>通知タイミング</th><th>送信先</th><th>件名例</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>会員登録時</td>
+        <td>会員</td>
+        <td>「【ナビナビ】メール認証のお願い」</td>
+      </tr>
+      <tr>
+        <td>メール認証完了</td>
+        <td>会員</td>
+        <td>「【ナビナビ】登録完了のお知らせ」</td>
+      </tr>
+      <tr>
+        <td>パスワードリセット要求</td>
+        <td>会員</td>
+        <td>「【ナビナビ】パスワード再設定のご案内」</td>
+      </tr>
+      <tr>
+        <td>レビュー投稿完了</td>
+        <td>会員（投稿者）</td>
+        <td>「【ナビナビ】ご投稿ありがとうございます（承認待ち）」</td>
+      </tr>
+      <tr>
+        <td>レビュー承認完了</td>
+        <td>会員（投稿者）</td>
+        <td>「【ナビナビ】レビューが公開されました」</td>
+      </tr>
+      <tr>
+        <td>レビュー差し戻し</td>
+        <td>会員（投稿者）</td>
+        <td>「【ナビナビ】レビューについてのご連絡」</td>
+      </tr>
+      <tr>
+        <td>レビュー非公開</td>
+        <td>会員（投稿者）</td>
+        <td>「【ナビナビ】レビューに関するお知らせ」</td>
+      </tr>
+      <tr>
+        <td>新規レビュー投稿</td>
+        <td>管理者</td>
+        <td>「【ナビナビ管理】新規レビューが投稿されました」</td>
+      </tr>
+      <tr>
+        <td>仮登録商品の発生</td>
+        <td>管理者</td>
+        <td>「【ナビナビ管理】新規商品の仮登録があります」</td>
+      </tr>
+      <tr>
+        <td>ステマ通報受領</td>
+        <td>管理者</td>
+        <td>「【ナビナビ管理】ステマ通報が届いています」</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>メール送信のインフラ</h2>
+
+  <p>WordPressデフォルトのwp_mail()関数では、サーバーから直接送信するため、迷惑メール判定されやすい問題があります。本サービスでは<strong>WP Mail SMTP</strong>プラグインを導入し、外部SMTPサービス経由でメール送信します。</p>
+
+  <h3>SMTPサービスの選定</h3>
+  <ul>
+    <li>SendGrid（無料プラン：100通／日）</li>
+    <li>Amazon SES（従量制、極めて安価）</li>
+    <li>Mailgun（無料プラン：5000通／月）</li>
+  </ul>
+
+  <p>初期は<strong>SendGridまたはMailgunの無料プラン</strong>から開始し、送信量に応じて移行を検討します。</p>
+
+  <h2>メールテンプレート</h2>
+
+  <p>各通知メールはテンプレート化し、HTMLメールで送信します。共通要素：</p>
+  <ul>
+    <li>ヘッダー：ナビナビロゴ、サービス名</li>
+    <li>本文：通知内容</li>
+    <li>CTAボタン：該当ページへの誘導リンク</li>
+    <li>フッター：会社情報、配信停止リンク（必須）、利用規約・プライバシーポリシーリンク</li>
+  </ul>
+
+  <h2>多言語対応</h2>
+
+  <p>会員のプロフィール設定言語に応じて、メール本文を日本語または韓国語で送信します。テンプレートは両言語版を用意します。</p>
+
+  <h2>送信失敗時の対応</h2>
+
+  <ul>
+    <li>送信エラーをログに記録</li>
+    <li>連続して失敗が発生した場合、管理者にアラート通知</li>
+    <li>会員側のメールアドレスエラーは、ユーザーに次回ログイン時に通知</li>
+  </ul>
+</section>
+
+<!-- ============== APPROVAL PAGE ============== -->
+<div class="approval-page" id="approval">
+  <div class="approval-title">本書の承認</div>
+
+  <p>本書（ナビナビ 基本設計書 v1.0）の内容について、navinabi様にご確認いただき、合意の上で次フェーズに進めさせていただきたく存じます。</p>
+
+  <p>下記の点について、書面（クラウドワークス上のメッセージ）にてご回答をお願いいたします。</p>
+
+  <ol>
+    <li>本書の全章をご確認いただいたこと</li>
+    <li>記載内容について、認識のずれがないこと</li>
+    <li>本書の内容で、Phase 2（デザインフェーズ）以降を進めることに合意いただけること</li>
+  </ol>
+
+  <p>ご確認の過程で、修正・追加のご要望がある場合は、お気軽にお伝えください。本書はv1.0として発行され、ご指摘を反映してv1.1、v1.2と更新していきます。</p>
+
+  <div class="approval-block">
+    <h3>承認情報</h3>
+
+    <table style="margin-top: 4mm;">
+      <tbody>
+        <tr>
+          <td style="width: 40%; border-bottom: 1px solid #e8e6e0;">文書名</td>
+          <td style="border-bottom: 1px solid #e8e6e0;">ナビナビ 基本設計書</td>
+        </tr>
+        <tr>
+          <td style="border-bottom: 1px solid #e8e6e0;">バージョン</td>
+          <td style="border-bottom: 1px solid #e8e6e0;">v1.0</td>
+        </tr>
+        <tr>
+          <td style="border-bottom: 1px solid #e8e6e0;">発行日</td>
+          <td style="border-bottom: 1px solid #e8e6e0;">2026年5月</td>
+        </tr>
+        <tr>
+          <td style="border-bottom: 1px solid #e8e6e0;">マイルストーン</td>
+          <td style="border-bottom: 1px solid #e8e6e0;">Phase 1 第1回検収対象</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="signature-row">
+      <div class="signature-cell" data-label="提出者">AKAME</div>
+      <div class="signature-cell" data-label="承認者（navinabi 様）">　</div>
+    </div>
+  </div>
+
+  <p style="margin-top: 30mm; text-align: center; color: #8a8a8a; font-size: 9pt;">— 本設計書終わり —</p>
+</div>
+
+</div><!-- /.doc-wrap -->
+
+<!-- フローティングナビ（スクリーン表示時のみ） -->
+<button class="float-print-btn" onclick="window.print()" title="PDFとして保存・印刷" aria-label="印刷">⎙</button>
+<button class="float-nav-btn" onclick="document.getElementById('navPanel').classList.add('open');document.getElementById('navOverlay').classList.add('open');" title="目次を開く" aria-label="目次">≡</button>
+
+<div class="nav-panel-overlay" id="navOverlay" onclick="document.getElementById('navPanel').classList.remove('open');this.classList.remove('open');"></div>
+
+<aside class="nav-panel" id="navPanel" aria-label="目次">
+  <div class="nav-panel-header">
+    <span class="nav-panel-title">目次</span>
+    <button class="nav-panel-close" onclick="document.getElementById('navPanel').classList.remove('open');document.getElementById('navOverlay').classList.remove('open');" aria-label="閉じる">×</button>
+  </div>
+  <ul>
+    <li><a href="#cover"><span class="nav-num">—</span><span>表紙</span></a></li>
+    <li><a href="#toc"><span class="nav-num">—</span><span>目次</span></a></li>
+    <li><a href="#intro"><span class="nav-num">—</span><span>本書について</span></a></li>
+
+    <li class="nav-section">PART 1　サイト構造設計</li>
+    <li><a href="#s1-1"><span class="nav-num">1-1</span><span>サイトマップ全体図</span></a></li>
+    <li><a href="#s1-2"><span class="nav-num">1-2</span><span>ページ一覧と役割定義</span></a></li>
+    <li><a href="#s1-3"><span class="nav-num">1-3</span><span>URL設計</span></a></li>
+
+    <li class="nav-section">PART 2　データ設計</li>
+    <li><a href="#s2-1"><span class="nav-num">2-1</span><span>エンティティ関係図（ER図）</span></a></li>
+    <li><a href="#s2-2"><span class="nav-num">2-2</span><span>エンティティ詳細仕様</span></a></li>
+    <li><a href="#s2-3"><span class="nav-num">2-3</span><span>レビューデータの構造</span></a></li>
+    <li><a href="#s2-4"><span class="nav-num">2-4</span><span>ユーザープロフィール設計</span></a></li>
+    <li><a href="#s2-5"><span class="nav-num">2-5</span><span>カテゴリ別評価項目</span></a></li>
+    <li><a href="#s2-6"><span class="nav-num">2-6</span><span>ユーザー属性スナップショット方式</span></a></li>
+
+    <li class="nav-section">PART 3　画面遷移設計</li>
+    <li><a href="#s3-1"><span class="nav-num">3-1</span><span>レビュー閲覧導線</span></a></li>
+    <li><a href="#s3-2"><span class="nav-num">3-2</span><span>レビュー投稿導線</span></a></li>
+    <li><a href="#s3-3"><span class="nav-num">3-3</span><span>管理者承認導線</span></a></li>
+    <li><a href="#s3-4"><span class="nav-num">3-4</span><span>権限別アクセス制御</span></a></li>
+
+    <li class="nav-section">PART 4　機能仕様</li>
+    <li><a href="#s4-1"><span class="nav-num">4-1</span><span>レビュー投稿フォーム仕様</span></a></li>
+    <li><a href="#s4-2"><span class="nav-num">4-2</span><span>レビュー承認ワークフロー</span></a></li>
+    <li><a href="#s4-3"><span class="nav-num">4-3</span><span>検索・フィルター・ランキング</span></a></li>
+    <li><a href="#s4-4"><span class="nav-num">4-4</span><span>サジェスト機能と仮登録フロー</span></a></li>
+    <li><a href="#s4-5"><span class="nav-num">4-5</span><span>レビュー自動翻訳ワークフロー</span></a></li>
+    <li><a href="#s4-6"><span class="nav-num">4-6</span><span>多言語対応の方針</span></a></li>
+    <li><a href="#s4-7"><span class="nav-num">4-7</span><span>ステマ対策の実装方針</span></a></li>
+    <li><a href="#s4-8"><span class="nav-num">4-8</span><span>通知・メール送信仕様</span></a></li>
+
+    <li><a href="#approval"><span class="nav-num">—</span><span>承認</span></a></li>
+  </ul>
+</aside>
+
+<script>
+  // リンクをクリックしたらパネルを閉じる
+  document.querySelectorAll('.nav-panel a').forEach(a => {
+    a.addEventListener('click', () => {
+      setTimeout(() => {
+        document.getElementById('navPanel').classList.remove('open');
+        document.getElementById('navOverlay').classList.remove('open');
+      }, 150);
+    });
+  });
+  // ESCキーでパネルを閉じる
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.getElementById('navPanel').classList.remove('open');
+      document.getElementById('navOverlay').classList.remove('open');
+    }
+  });
+</script>
+
+</body>
+</html>
